@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
   internetLeft.Install(nodesLeft);
 
   Ipv4AddressHelper ipv4Left;
-  ipv4Left.SetBase("172.1.0.0", "255.255.0.0", "0.0.0.10");
+  ipv4Left.SetBase("10.1.0.0", "255.255.0.0", "0.0.0.10");
   Ipv4InterfaceContainer interfacesLeft = ipv4Left.Assign(devicesLeft);
 
   // Create the right side CSMA network of 4 nodes.
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
   internetRight.Install(nodesRight);
   
   Ipv4AddressHelper ipv4Right;
-  ipv4Right.SetBase ("172.99.0.0", "255.255.0.0", "0.0.0.10");
+  ipv4Right.SetBase ("10.99.0.0", "255.255.0.0", "0.0.0.10");
   Ipv4InterfaceContainer interfacesRight = ipv4Right.Assign(devicesRight);
 
   // Stick in the point-to-point line between the sides.
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
   NetDeviceContainer devices = p2p.Install(nodes);
 
   Ipv4AddressHelper ipv4;
-  ipv4.SetBase("172.50.0.0", "255.255.0.0");
+  ipv4.SetBase("10.50.0.0", "255.255.0.0");
   Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
 
   // Connect eth0.
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
   NS_LOG_INFO("Create IPv4 Interface");
   Ptr<Ipv4> node0Ipv4Left = nodesLeft.Get(0)->GetObject<Ipv4>();
   uint32_t interfaceLeft = node0Ipv4Left->AddInterface(deviceLeft);
-  Ipv4InterfaceAddress addressLeft = Ipv4InterfaceAddress("172.0.0.2", "255.255.0.0");
+  Ipv4InterfaceAddress addressLeft = Ipv4InterfaceAddress("10.0.0.2", "255.255.0.0");
   node0Ipv4Left->AddAddress(interfaceLeft, addressLeft);
   node0Ipv4Left->SetMetric(interfaceLeft, 1);
   node0Ipv4Left->SetUp(interfaceLeft);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
   NS_LOG_INFO ("Create IPv4 Interface");
   Ptr<Ipv4> node0Ipv4Right = nodesRight.Get(0)->GetObject<Ipv4>();
   uint32_t interfaceRight = node0Ipv4Right->AddInterface(deviceRight);
-  Ipv4InterfaceAddress addressRight = Ipv4InterfaceAddress("172.100.0.2", "255.255.0.0");
+  Ipv4InterfaceAddress addressRight = Ipv4InterfaceAddress("10.100.0.2", "255.255.0.0");
   node0Ipv4Right->AddAddress(interfaceRight, addressRight);
   node0Ipv4Right->SetMetric(interfaceRight, 1);
   node0Ipv4Right->SetUp(interfaceRight);
