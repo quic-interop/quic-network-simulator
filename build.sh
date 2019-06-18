@@ -12,7 +12,7 @@ cd ..
 echo "Configuring networks..."
 docker network create leftnet --subnet 10.0.0.0/16
 docker network create rightnet --subnet 10.100.0.0/16
-docker create -it --privileged --net rightnet --ip 10.100.0.2 --name sim qns sh
+docker create -it --cap-add=NET_ADMIN --net rightnet --ip 10.100.0.2 --name sim qns sh
 docker network connect leftnet sim --ip 10.0.0.2
 
 cd endpoint
