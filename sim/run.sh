@@ -11,6 +11,10 @@ ifconfig eth0 promisc
 ifconfig eth1 hw ether 02:51:55:49:43:01
 ifconfig eth1 promisc
 
+# A packet arriving at eth0 destined to 10.100.0.0/16 could be routed directly to eth1,
+# and a packet arriving at eth1 destined to 10.0.0.0/16 directly to eth0.
+# This would allow packets to skip the ns3 simulator altogether.
+# Drop those to make sure they actually take the path through ns3.
 iptables -A FORWARD -i eth0 -o eth1 -j DROP
 iptables -A FORWARD -i eth1 -o eth0 -j DROP
 
