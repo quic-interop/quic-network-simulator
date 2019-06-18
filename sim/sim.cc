@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
   emuRight.SetDeviceName("eth1");
   NetDeviceContainer device0Right = emuRight.Install(nodesRight.Get(0));
   Ptr<NetDevice> deviceRight = device0Right.Get(0);
-  deviceLeft->SetAttribute("Address", Mac48AddressValue("02:51:55:49:43:01"));
+  deviceRight->SetAttribute("Address", Mac48AddressValue("02:51:55:49:43:01"));
 
   NS_LOG_INFO ("Create IPv4 Interface");
   Ptr<Ipv4> node0Ipv4Right = nodesRight.Get(0)->GetObject<Ipv4>();

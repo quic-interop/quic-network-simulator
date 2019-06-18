@@ -2,7 +2,7 @@
 ifconfig eth0 hw ether 02:51:55:49:43:00
 ifconfig eth0 promisc
 
-ifconfig eth0 hw ether 02:51:55:49:43:01
+ifconfig eth1 hw ether 02:51:55:49:43:01
 ifconfig eth1 promisc
 
 iptables -A FORWARD -i eth0 -o eth1 -j DROP
