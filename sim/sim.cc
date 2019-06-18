@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
   emuLeft.SetDeviceName("eth0");
   NetDeviceContainer device0Left = emuLeft.Install(nodesLeft.Get(0));
   Ptr<NetDevice> deviceLeft = device0Left.Get(0);
+  // use the real MAC address of eth0
   deviceLeft->SetAttribute("Address", Mac48AddressValue("02:51:55:49:43:00"));
 
   NS_LOG_INFO("Create IPv4 Interface");
@@ -87,6 +88,7 @@ int main(int argc, char *argv[]) {
   emuRight.SetDeviceName("eth1");
   NetDeviceContainer device0Right = emuRight.Install(nodesRight.Get(0));
   Ptr<NetDevice> deviceRight = device0Right.Get(0);
+  // use the real MAC address of eth1
   deviceRight->SetAttribute("Address", Mac48AddressValue("02:51:55:49:43:01"));
 
   NS_LOG_INFO ("Create IPv4 Interface");
