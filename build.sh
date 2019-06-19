@@ -2,7 +2,8 @@
 
 echo "Cleaning up..."
 docker kill sim client server
-docker system prune --force
+docker rm sim client server
+docker network rm leftnet rightnet
 
 echo "Building NS3 container..."
 cd sim
