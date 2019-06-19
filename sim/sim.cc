@@ -16,6 +16,21 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("ns3 simulator");
 
+void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue macAddress, Ipv4InterfaceAddress ipv4Address) {
+  EmuFdNetDeviceHelper emu;
+  emu.SetDeviceName(deviceName);
+  NetDeviceContainer devices = emu.Install(node);
+  Ptr<NetDevice> device = devices.Get(0);
+  device->SetAttribute("Address", macAddress);
+
+  Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+  uint32_t interface = ipv4->AddInterface(device);
+  ipv4->AddAddress(interface, ipv4Address);
+  ipv4->SetMetric(interface, 1);
+  ipv4->SetUp(interface);
+}
+
+
 int main(int argc, char *argv[]) {
   GlobalValue::Bind("SimulatorImplementationType", StringValue("ns3::RealtimeSimulatorImpl"));
   GlobalValue::Bind("ChecksumEnabled", BooleanValue(true));
@@ -50,7 +65,7 @@ int main(int argc, char *argv[]) {
   internetRight.Install(nodesRight);
   
   Ipv4AddressHelper ipv4Right;
-  ipv4Right.SetBase ("10.99.0.0", "255.255.0.0", "0.0.0.10");
+  ipv4Right.SetBase("10.99.0.0", "255.255.0.0", "0.0.0.10");
   Ipv4InterfaceContainer interfacesRight = ipv4Right.Assign(devicesRight);
 
   // Stick in the point-to-point line between the sides.
@@ -65,39 +80,10 @@ int main(int argc, char *argv[]) {
   ipv4.SetBase("10.50.0.0", "255.255.0.0");
   Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
 
-  // Connect eth0.
   NS_LOG_INFO("Create eth0");
-  EmuFdNetDeviceHelper emuLeft;
-  emuLeft.SetDeviceName("eth0");
-  NetDeviceContainer device0Left = emuLeft.Install(nodesLeft.Get(0));
-  Ptr<NetDevice> deviceLeft = device0Left.Get(0);
-  // use the real MAC address of eth0
-  deviceLeft->SetAttribute("Address", Mac48AddressValue("02:51:55:49:43:00"));
-
-  NS_LOG_INFO("Create IPv4 Interface");
-  Ptr<Ipv4> node0Ipv4Left = nodesLeft.Get(0)->GetObject<Ipv4>();
-  uint32_t interfaceLeft = node0Ipv4Left->AddInterface(deviceLeft);
-  Ipv4InterfaceAddress addressLeft = Ipv4InterfaceAddress("10.0.0.2", "255.255.0.0");
-  node0Ipv4Left->AddAddress(interfaceLeft, addressLeft);
-  node0Ipv4Left->SetMetric(interfaceLeft, 1);
-  node0Ipv4Left->SetUp(interfaceLeft);
-
-  // Connect eth1.
+  installNetDevice(nodesLeft.Get(0), "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("10.0.0.2", "255.255.0.0"));
   NS_LOG_INFO("Create eth1");
-  EmuFdNetDeviceHelper emuRight;
-  emuRight.SetDeviceName("eth1");
-  NetDeviceContainer device0Right = emuRight.Install(nodesRight.Get(0));
-  Ptr<NetDevice> deviceRight = device0Right.Get(0);
-  // use the real MAC address of eth1
-  deviceRight->SetAttribute("Address", Mac48AddressValue("02:51:55:49:43:01"));
-
-  NS_LOG_INFO ("Create IPv4 Interface");
-  Ptr<Ipv4> node0Ipv4Right = nodesRight.Get(0)->GetObject<Ipv4>();
-  uint32_t interfaceRight = node0Ipv4Right->AddInterface(deviceRight);
-  Ipv4InterfaceAddress addressRight = Ipv4InterfaceAddress("10.100.0.2", "255.255.0.0");
-  node0Ipv4Right->AddAddress(interfaceRight, addressRight);
-  node0Ipv4Right->SetMetric(interfaceRight, 1);
-  node0Ipv4Right->SetUp(interfaceRight);
+  installNetDevice(nodesRight.Get(0), "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("10.100.0.2", "255.255.0.0"));
 
   // enable pcaps for all nodes
   csmaLeft.EnablePcapAll("tap-wifi-dumbbell", false);
