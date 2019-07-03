@@ -12,7 +12,9 @@ WORKDIR /ns-allinone-3.29/ns-3.29
 RUN ./waf configure --build-profile=optimized
 RUN ./waf build
 
-COPY sim.cc ./scratch
+RUN mkdir ./scratch/sim
+COPY quic-network-simulator-helper.h quic-network-simulator-helper.cc ./scratch/sim/  
+COPY sim.cc ./scratch/sim
 
 COPY run.sh .
 RUN chmod +x ./run.sh
