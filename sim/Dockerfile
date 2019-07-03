@@ -9,7 +9,7 @@ RUN wget https://www.nsnam.org/release/ns-allinone-3.29.tar.bz2 && \
 
 WORKDIR /ns-allinone-3.29/ns-3.29
 
-RUN ./waf configure --enable-sudo --enable-tests --enable-examples
+RUN ./waf configure --build-profile=optimized
 RUN ./waf build
 
 COPY sim.cc ./scratch
