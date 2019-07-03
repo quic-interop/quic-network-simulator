@@ -34,22 +34,16 @@ int main(int argc, char *argv[]) {
   GlobalValue::Bind("SimulatorImplementationType", StringValue("ns3::RealtimeSimulatorImpl"));
   GlobalValue::Bind("ChecksumEnabled", BooleanValue(true));
 
-  NodeContainer nodesLeft;
-  nodesLeft.Create(1);
-  InternetStackHelper internetLeft;
-  internetLeft.Install(nodesLeft);
-
-  NodeContainer nodesRight;
-  nodesRight.Create(1);
-  InternetStackHelper internetRight;
-  internetRight.Install(nodesRight);
+  NodeContainer nodes;
+  nodes.Create(2);
+  InternetStackHelper internet;
+  internet.Install(nodes);
 
   // Stick in the point-to-point line between the sides.
   PointToPointHelper p2p;
   p2p.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
   p2p.SetChannelAttribute("Delay", StringValue("10ms"));
 
-  NodeContainer nodes = NodeContainer(nodesLeft.Get(0), nodesRight.Get(0));
   NetDeviceContainer devices = p2p.Install(nodes);
 
   Ipv4AddressHelper ipv4;
@@ -57,9 +51,9 @@ int main(int argc, char *argv[]) {
   Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
 
   NS_LOG_INFO("Create eth0");
-  installNetDevice(nodesLeft.Get(0), "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("10.0.0.2", "255.255.0.0"));
+  installNetDevice(nodes.Get(0), "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("10.0.0.2", "255.255.0.0"));
   NS_LOG_INFO("Create eth1");
-  installNetDevice(nodesRight.Get(0), "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("10.100.0.2", "255.255.0.0"));
+  installNetDevice(nodes.Get(1), "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("10.100.0.2", "255.255.0.0"));
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
