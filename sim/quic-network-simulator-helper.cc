@@ -37,6 +37,19 @@ QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
   installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("10.100.0.2", "255.255.0.0"));
 }
 
+void QuicNetworkSimulatorHelper::Run(Time duration) {
+  Ipv4GlobalRoutingHelper::PopulateRoutingTables();
+  // write the routing table to file
+  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("dynamic-global-routing.routes", std::ios::out);
+  Ipv4RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
+
+  NS_LOG_INFO("Run Emulation.");
+  Simulator::Stop(duration);
+  Simulator::Run();
+  Simulator::Destroy();
+  NS_LOG_INFO("Done.");
+}
+
 Ptr<Node> QuicNetworkSimulatorHelper::GetLeftNode() const {
   return left_node_;
 }

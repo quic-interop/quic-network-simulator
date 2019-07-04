@@ -8,6 +8,7 @@ using namespace ns3;
 class QuicNetworkSimulatorHelper {
 public:
   QuicNetworkSimulatorHelper();
+  void Run(Time);
   Ptr<Node> GetLeftNode() const;
   Ptr<Node> GetRightNode() const;
 

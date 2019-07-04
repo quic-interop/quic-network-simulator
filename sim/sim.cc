@@ -18,20 +18,9 @@ int main(int argc, char *argv[]) {
   p2p.SetChannelAttribute("Delay", StringValue("10ms"));
 
   NetDeviceContainer devices = p2p.Install(sim.GetLeftNode(), sim.GetRightNode());
-
   Ipv4AddressHelper ipv4;
   ipv4.SetBase("10.50.0.0", "255.255.0.0");
   Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
 
-  Ipv4GlobalRoutingHelper::PopulateRoutingTables();
-
-  // write the routing table to file
-  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("dynamic-global-routing.routes", std::ios::out);
-  Ipv4RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
-
-  NS_LOG_INFO("Run Emulation.");
-  Simulator::Stop(Seconds(36000.0));
-  Simulator::Run();
-  Simulator::Destroy();
-  NS_LOG_INFO("Done.");
+  sim.Run(Seconds(36000));
 }
