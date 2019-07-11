@@ -10,6 +10,19 @@ The build script builds the network simulator (as found in the [sim](sim) direct
 
 The build script creates two networks, `leftnet` (192.168.0.0/24) and `rightnet` (192.168.100.0/24). Leftnet is connected to the client, and rightnet is connected to the server. The ns3 simulation sits in the middle and forwards packets from leftnet to rightnet and vice versa, through the ns3 simulation.
 
+```
+                                      |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
+                                      |                      sim                         |
+                                      |                                                  |      
+|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|‾‾‾‾‾‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
+|     client    |     | docker-bridge |     eth0    |     |        |     |     eth1      | docker-bridge |     |      server     |
+|               |-----|               |             |-----|  ns-3  |-----|               |               |-----|                 |
+| 192.168.0.100 |     |  192.168.0.1  | 192.168.0.2 |     |        |     | 192.168.100.2 | 192.168.100.1 |     | 192.168.100.100 |
+|_______________|     |_______________|_____________|     |________|     |_______________|_______________|     |_________________|
+                                      |                                                  |
+                                      |__________________________________________________|
+```
+
 ## Running a simulation
 
 The build script automatically runs the three containers.
