@@ -8,7 +8,7 @@ The build script builds the network simulator (as found in the [sim](sim) direct
 
 ## Network topology
 
-The build script creates two networks, `leftnet` (10.0.0.0/16) and `rightnet` (10.100.0.0/16). Leftnet is connected to the client, and rightnet is connected to the server. The ns3 simulation sits in the middle and forwards packets from leftnet to rightnet and vice versa, through the ns3 simulation.
+The build script creates two networks, `leftnet` (192.168.0.0/24) and `rightnet` (192.168.100.0/24). Leftnet is connected to the client, and rightnet is connected to the server. The ns3 simulation sits in the middle and forwards packets from leftnet to rightnet and vice versa, through the ns3 simulation.
 
 ## Running a simulation
 
@@ -19,6 +19,6 @@ docker exec -it client /bin/bash
 ```
 Now you can ping the server
 ```sh
-ping 10.100.0.100
+ping 192.168.100.100
 ```
 All containers have tcpdump installed, so you can follow the packets flowing through the simulation.

@@ -6,8 +6,7 @@ echo "Setting up routes..."
 # This command makes sure that the endpoints set the checksum on outgoing packets.
 ethtool -K eth0 tx off
 
-route add -net 10.0.0.0 netmask 255.0.0.0 gw $GATEWAY
+route add -net 192.168.0.0 netmask 255.255.0.0 gw $GATEWAY
 # delete unused routes
-route del -net 10.0.0.0 netmask 255.255.0.0
-route del -net 10.100.0.0 netmask 255.255.0.0
-
+route del -net 192.168.0.0 netmask 255.255.255.0
+route del -net 192.168.100.0 netmask 255.255.255.0
