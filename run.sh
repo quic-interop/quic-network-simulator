@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# clean up the sim container (which might exist from a prior run)
+docker rm sim &> /dev/null
+
 echo "Building NS3 container..."
 docker build sim/ -t qns
 
