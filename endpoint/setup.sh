@@ -8,8 +8,8 @@ ethtool -K eth0 tx off
 
 IP=`hostname -I`
 GATEWAY="${IP%.*}.2"
+UNNEEDED_ROUTE="${IP%.*}.0"
 
 route add -net 192.168.0.0 netmask 255.255.0.0 gw $GATEWAY
-# delete unused routes
-route del -net 192.168.0.0 netmask 255.255.255.0
-route del -net 192.168.100.0 netmask 255.255.255.0
+# delete unused route
+route del -net $UNNEEDED_ROUTE netmask 255.255.255.0
