@@ -2,10 +2,6 @@
 
 The build script builds the network simulator (as found in the [sim](sim) directory) and a client and a server (as found in the [endpoint](endpoint) directory).
 
-```sh
-./build.sh
-```
-
 ## Network topology
 
 The build script creates two networks, `leftnet` (192.168.0.0/24) and `rightnet` (192.168.100.0/24). Leftnet is connected to the client, and rightnet is connected to the server. The ns3 simulation sits in the middle and forwards packets from leftnet to rightnet and vice versa, through the ns3 simulation.
@@ -25,13 +21,47 @@ The build script creates two networks, `leftnet` (192.168.0.0/24) and `rightnet`
 
 ## Running a simulation
 
-The build script automatically runs the three containers.
-You can open a shell in the containers by running
-```sh
-docker exec -it client /bin/bash
+### Setting up the networks
+
+To set up `leftnet` and `rightnet`, run the following commands
+```bash
+docker network create leftnet --subnet 192.168.0.0/24
+docker network create rightnet --subnet 192.168.100.0/24
 ```
-Now you can ping the server
-```sh
-ping 192.168.100.100
+
+The networks can be removed by executing
+```bash
+docker network rm leftnet rightnet
 ```
-All containers have tcpdump installed, so you can follow the packets flowing through the simulation.
+
+### Running the simulator
+
+To run the simulator, you need to set up the networks first, as described above.
+After that, build and run the simulator:
+```bash
+./run.sh
+```
+
+### Running the endpoints
+
+The [endpoint](endpoint) directory contains the base docker image for an endpoint container. The built image is available on [dockerhub](https://hub.docker.com/r/martenseemann/quic-network-simulator-endpoint).
+
+If you want to build the endpoint image, you can do so by running
+```bash
+docker build endpoint/ -t endpoint
+```
+
+Run the client:
+```bash
+docker run --cap-add=NET_ADMIN --network leftnet --ip 192.168.0.100 -it --entrypoint /bin/bash endpoint 
+```
+
+And the server:
+```bash
+docker run --cap-add=NET_ADMIN --network rightnet --ip 192.168.100.100 -it --entrypoint /bin/bash endpoint 
+```
+
+Note that in order to configure the containers to work in this simulation, you have to set up the routing by running (inside the container):
+```
+./setup
+```
