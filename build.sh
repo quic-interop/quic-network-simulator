@@ -20,8 +20,8 @@ cd endpoint
 echo "Building endpoint container..."
 docker build . -t endpoint
 echo "Running server and client container..."
-docker run -d --cap-add=NET_ADMIN --network leftnet --ip 192.168.0.100 -e GATEWAY="192.168.0.2" --name client endpoint
-docker run -d --cap-add=NET_ADMIN --network rightnet --ip 192.168.100.100 -e GATEWAY="192.168.100.2" --name server endpoint
+docker run -d --cap-add=NET_ADMIN --network leftnet --ip 192.168.0.100 --name client endpoint
+docker run -d --cap-add=NET_ADMIN --network rightnet --ip 192.168.100.100 --name server endpoint
 cd ..
 
 echo "Starting NS3 container"
