@@ -18,4 +18,4 @@ ifconfig eth1 promisc
 iptables -A FORWARD -i eth0 -o eth1 -j DROP
 iptables -A FORWARD -i eth1 -o eth0 -j DROP
 
-./waf --run sim
+./waf --run "sim --delay=10ms --bandwidth=10Mbps"

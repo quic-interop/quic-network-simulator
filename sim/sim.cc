@@ -10,12 +10,18 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("ns3 simulator");
 
 int main(int argc, char *argv[]) {
+  std::string delay, bandwidth;
+  CommandLine cmd;
+  cmd.AddValue("delay", "delay of the p2p link", delay);
+  cmd.AddValue("bandwidth", "bandwidth of the p2p link", bandwidth);
+  cmd.Parse (argc, argv);
+
   QuicNetworkSimulatorHelper sim;
 
   // Stick in the point-to-point line between the sides.
   PointToPointHelper p2p;
-  p2p.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
-  p2p.SetChannelAttribute("Delay", StringValue("10ms"));
+  p2p.SetDeviceAttribute("DataRate", StringValue(bandwidth));
+  p2p.SetChannelAttribute("Delay", StringValue(delay));
 
   NetDeviceContainer devices = p2p.Install(sim.GetLeftNode(), sim.GetRightNode());
   Ipv4AddressHelper ipv4;
