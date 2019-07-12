@@ -17,6 +17,6 @@ COPY quic-network-simulator-helper.h quic-network-simulator-helper.cc ./scratch/
 COPY sim.cc ./scratch/sim
 
 COPY run.sh .
-RUN chmod +x ./run.sh
+RUN chmod +x run.sh
 
-ENTRYPOINT ./run.sh
+ENTRYPOINT [ "./run.sh" ]

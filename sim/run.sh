@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 # We are using eth0 and eth1 as EmuFdNetDevices in ns3.
 # ns3 usually uses MAC address spoofing to separate ns3 from other traffic,
