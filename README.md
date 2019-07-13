@@ -39,10 +39,10 @@ docker network rm leftnet rightnet
 To run the simulator, you need to set up the networks first, as described above.
 After that, build and run the simulator:
 ```bash
-./run.sh sim --delay=10ms --bandwidth=10Mbps
+./run.sh simple-p2p --delay=10ms --bandwidth=10Mbps
 ```
 
-All paramters to `run.sh` are passed to waf, i.e. the command run inside the container will be `./waf --run "sim --delay=10ms --bandwidth=10Mbps"`.
+All paramters to `run.sh` are passed to waf, i.e. the command run inside the container will be `./waf --run "simple-p2p --delay=10ms --bandwidth=10Mbps"`.
 
 ### Running the endpoints
 
