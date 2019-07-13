@@ -16,8 +16,7 @@ COPY wscript.patch .
 RUN patch < wscript.patch
 
 RUN rm -r scratch/subdir scratch/scratch-simulator.cc
-COPY helper scratch/helper
-COPY *.cc scratch/
+COPY scenarios scratch/
 
 COPY run.sh .
 RUN chmod +x run.sh

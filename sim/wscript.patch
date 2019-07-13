@@ -1,6 +1,6 @@
 --- wscript.orig
 +++ wscript
-@@ -758,7 +758,7 @@
+@@ -758,12 +758,13 @@
  
      try:
          for filename in os.listdir("scratch"):
@@ -9,12 +9,9 @@
                  continue
              if os.path.isdir(os.path.join("scratch", filename)):
                  obj = bld.create_ns3_program(filename, all_modules)
-@@ -771,7 +771,7 @@
-                 name = filename[:-len(".cc")]
-                 obj = bld.create_ns3_program(name, all_modules)
-                 obj.path = obj.path.find_dir('scratch')
--                obj.source = filename
-+                obj.source = [ filename, 'helper/quic-network-simulator-helper.cc' ]
-                 obj.target = name
+                 obj.path = obj.path.find_dir('scratch').find_dir(filename)
+                 obj.source = obj.path.ant_glob('*.cc')
++                obj.source.append('../helper/quic-network-simulator-helper.cc')
+                 obj.target = filename
                  obj.name = obj.target
                  obj.install_path = None
