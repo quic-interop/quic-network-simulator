@@ -3,7 +3,7 @@
 #include "ns3/core-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/point-to-point-module.h"
-#include "quic-network-simulator-helper.h"
+#include "helper/quic-network-simulator-helper.h"
 
 using namespace ns3;
 

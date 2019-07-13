@@ -1,0 +1,20 @@
+--- wscript.orig
++++ wscript
+@@ -758,7 +758,7 @@
+ 
+     try:
+         for filename in os.listdir("scratch"):
+-            if filename.startswith('.') or filename == 'CVS':
++            if filename.startswith('.') or filename == 'CVS' or filename == 'helper':
+                 continue
+             if os.path.isdir(os.path.join("scratch", filename)):
+                 obj = bld.create_ns3_program(filename, all_modules)
+@@ -771,7 +771,7 @@
+                 name = filename[:-len(".cc")]
+                 obj = bld.create_ns3_program(name, all_modules)
+                 obj.path = obj.path.find_dir('scratch')
+-                obj.source = filename
++                obj.source = [ filename, 'helper/quic-network-simulator-helper.cc' ]
+                 obj.target = name
+                 obj.name = obj.target
+                 obj.install_path = None
