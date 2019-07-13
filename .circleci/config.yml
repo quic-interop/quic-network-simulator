@@ -15,18 +15,14 @@ jobs:
           docker_layer_caching: true
       - run:
           name: Build docker image for the endpoint
-          command: |
-            cd endpoint
-            docker build . -t $IMAGE_NAME:latest
+          command: docker build endpoint -t $IMAGE_NAME:latest
       - run:
           name: Archive Docker image
-          command: |
-            cd endpoint
-            docker save -o image.tar $IMAGE_NAME
+          command: docker save -o image.tar $IMAGE_NAME
       - persist_to_workspace:
           root: .
           paths:
-            - ./endpoint/image.tar
+            - ./image.tar
   publish-endpoint-latest:
     executor: docker-publisher
     steps:
@@ -36,7 +32,7 @@ jobs:
           docker_layer_caching: true
       - run:
           name: Load archived Docker image
-          command: docker load -i /tmp/workspace/endpoint/image.tar
+          command: docker load -i /tmp/workspace/image.tar
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
