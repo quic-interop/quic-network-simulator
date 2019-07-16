@@ -1,4 +1,6 @@
 #!/bin/bash
+set -o pipefail
+set -e
 
 if [[ $# -eq 0 ]] ; then
     echo "expected scenario to run"
@@ -6,7 +8,7 @@ if [[ $# -eq 0 ]] ; then
 fi
 
 # clean up the sim container (which might exist from a prior run)
-docker rm sim &> /dev/null
+docker rm sim &> /dev/null || true
 
 echo "Building NS3 container..."
 docker build sim/ -t qns
