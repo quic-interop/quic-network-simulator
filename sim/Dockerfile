@@ -12,11 +12,15 @@ WORKDIR /ns-allinone-3.29/ns-3.29
 RUN ./waf configure --build-profile=optimized
 RUN ./waf build
 
+# make including of the QuicNetworkSimulatorHelper class possible
 COPY wscript.patch .
 RUN patch < wscript.patch
 
 RUN rm -r scratch/subdir scratch/scratch-simulator.cc
 COPY scenarios scratch/
+
+# compile all the scenarios
+RUN ./waf build
 
 COPY run.sh .
 RUN chmod +x run.sh
