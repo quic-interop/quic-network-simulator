@@ -55,12 +55,12 @@ docker build endpoint/ -t endpoint
 
 Run the client:
 ```bash
-docker run --cap-add=NET_ADMIN --network leftnet --ip 192.168.0.100 -it --entrypoint /bin/bash endpoint 
+docker run --cap-add=NET_ADMIN --network leftnet --hostname client --ip 192.168.0.100 -it --entrypoint /bin/bash endpoint 
 ```
 
 And the server:
 ```bash
-docker run --cap-add=NET_ADMIN --network rightnet --ip 192.168.100.100 -it --entrypoint /bin/bash endpoint 
+docker run --cap-add=NET_ADMIN --network rightnet --hostname server --ip 192.168.100.100 -it --entrypoint /bin/bash endpoint 
 ```
 
 Note that in order to configure the containers to work in this simulation, you have to set up the routing by running (inside the container):
