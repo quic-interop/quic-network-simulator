@@ -9,10 +9,11 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("ns3 simulator");
 
 int main(int argc, char *argv[]) {
-  std::string delay, bandwidth, cross_data_rate;
+  std::string delay, bandwidth, queue, cross_data_rate;
   CommandLine cmd;
   cmd.AddValue("delay", "delay of the p2p link", delay);
   cmd.AddValue("bandwidth", "bandwidth of the p2p link", bandwidth);
+  cmd.AddValue("queue", "queue size of the p2p link", queue);
   cmd.AddValue("crossdatarate", "data rate of the cross traffic", cross_data_rate);
   cmd.Parse (argc, argv);
 
@@ -21,6 +22,7 @@ int main(int argc, char *argv[]) {
   PointToPointHelper p2p;
   p2p.SetDeviceAttribute("DataRate", StringValue(bandwidth));
   p2p.SetChannelAttribute("Delay", StringValue(delay));
+  p2p.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue(queue + "p"));
 
   NetDeviceContainer devices = p2p.Install(sim.GetLeftNode(), sim.GetRightNode());
   Ipv4AddressHelper ipv4;
