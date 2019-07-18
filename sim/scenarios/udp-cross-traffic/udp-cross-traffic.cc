@@ -3,6 +3,7 @@
 #include "ns3/point-to-point-module.h"
 #include "ns3/applications-module.h"
 #include "../helper/quic-network-simulator-helper.h"
+#include "../helper/quic-point-to-point-helper.h"
 
 using namespace ns3;
 
@@ -13,13 +14,13 @@ int main(int argc, char *argv[]) {
   CommandLine cmd;
   cmd.AddValue("delay", "delay of the p2p link", delay);
   cmd.AddValue("bandwidth", "bandwidth of the p2p link", bandwidth);
-  cmd.AddValue("queue", "queue size of the p2p link", queue);
+  cmd.AddValue("queue", "queue size of the p2p link (in packets)", queue);
   cmd.AddValue("crossdatarate", "data rate of the cross traffic", cross_data_rate);
   cmd.Parse (argc, argv);
 
   QuicNetworkSimulatorHelper sim;
 
-  PointToPointHelper p2p;
+  QuicPointToPointHelper p2p;
   p2p.SetDeviceAttribute("DataRate", StringValue(bandwidth));
   p2p.SetChannelAttribute("Delay", StringValue(delay));
   p2p.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue(queue + "p"));
