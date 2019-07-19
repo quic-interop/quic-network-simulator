@@ -49,17 +49,39 @@ All paramters to `run.sh` are passed to waf, i.e. the command run inside the con
 The [endpoint](endpoint) directory contains the base docker image for an endpoint container. 
 The pre-built image is available on [dockerhub](https://hub.docker.com/r/martenseemann/quic-network-simulator-endpoint).
 
-When building a Docker image for your own QUIC implementation, use it as the base image:
+When building a Docker image for your own QUIC implementation, there are two files you need to create: `Dockerfile` and `run_endpoint.sh`.
+Copy this Dockerfile and add the commands to build your QUIC implementation.
 ```docker
 FROM martenseemann/quic-network-simulator-endpoint:latest
+
+# download and build your QUIC implementation
+# [ DO WORK HERE ]
+
+# copy run script and run it
+COPY run_endpoint.sh .
+RUN chmod +x run_endpoint.sh
+ENTRYPOINT [ "./run_endpoint.sh" ]
 ```
 
-In order to configure the containers to work in this simulation, you have to run the set up script that comes with the endpoint. It's a good idea to make this first thing that you run when starting the container:
+`run_endpoint.sh` could look like this:
 ```bash
-./setup
+# Set up the routing needed for the simulation.
+/setup.sh
+
+ROLE=$1
+shift
+
+if [ "$ROLE" == "client" ]; then
+    [ INSERT COMMAND TO RUN YOUR QUIC CLIENT ]
+elif [ "$ROLE" == "server" ]; then
+    [ INSERT COMMAND TO RUN YOUR QUIC SERVER ]
+fi
 ```
 
-Build your image and assign a tag (`$YOURTAG`).
+Build your image and assign a tag (`$YOURTAG`):
+```
+docker build . -t $YOURTAG
+```
 
 Run the client:
 ```bash
