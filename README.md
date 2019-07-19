@@ -44,26 +44,34 @@ After that, build and run the simulator:
 
 All paramters to `run.sh` are passed to waf, i.e. the command run inside the container will be `./waf --run "simple-p2p --delay=10ms --bandwidth=10Mbps"`.
 
-### Running the endpoints
+### Building your own QUIC endpoint
 
-The [endpoint](endpoint) directory contains the base docker image for an endpoint container. The built image is available on [dockerhub](https://hub.docker.com/r/martenseemann/quic-network-simulator-endpoint).
+The [endpoint](endpoint) directory contains the base docker image for an endpoint container. 
+The pre-built image is available on [dockerhub](https://hub.docker.com/r/martenseemann/quic-network-simulator-endpoint).
 
-If you want to build the endpoint image, you can do so by running
-```bash
-docker build endpoint/ -t endpoint
+When building a Docker image for your own QUIC implementation, use it as the base image:
+```docker
+FROM martenseemann/quic-network-simulator-endpoint:latest
 ```
+
+In order to configure the containers to work in this simulation, you have to run the set up script that comes with the endpoint. It's a good idea to make this first thing that you run when starting the container:
+```bash
+./setup
+```
+
+Build your image and assign a tag (`$YOURTAG`).
 
 Run the client:
 ```bash
-docker run --cap-add=NET_ADMIN --network leftnet --hostname client --ip 192.168.0.100 -it --entrypoint /bin/bash endpoint 
+docker run --cap-add=NET_ADMIN --network leftnet --hostname client --ip 192.168.0.100 -it --entrypoint /bin/bash $YOURTAG
 ```
 
 And the server:
 ```bash
-docker run --cap-add=NET_ADMIN --network rightnet --hostname server --ip 192.168.100.100 -it --entrypoint /bin/bash endpoint 
+docker run --cap-add=NET_ADMIN --network rightnet --hostname server --ip 192.168.100.100 -it --entrypoint /bin/bash $YOURTAG
 ```
 
-Note that in order to configure the containers to work in this simulation, you have to set up the routing by running (inside the container):
-```
-./setup
+For an example, have a look at the [quic-go Docker image](https://github.com/marten-seemann/quic-go-docker).
+```bash
+docker build . -t $YOURTAG
 ```
