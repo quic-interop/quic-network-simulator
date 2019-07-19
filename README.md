@@ -84,7 +84,7 @@ Follow these steps to build a Docker image for your own QUIC implementation:
     ENTRYPOINT [ "./run_endpoint.sh" ]
     ```
 
-    1. Now, copy the script below into `run_endpoint.sh`, and add commands as instructed.
+1. Now, copy the script below into `run_endpoint.sh`, and add commands as instructed.
 
     ```bash
     # Set up the routing needed for the simulation.
