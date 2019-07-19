@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   QuicPointToPointHelper p2p;
   p2p.SetDeviceAttribute("DataRate", StringValue(bandwidth));
   p2p.SetChannelAttribute("Delay", StringValue(delay));
-  p2p.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue(queue + "p"));
+  p2p.SetQueueSize(StringValue(queue + "p"));
 
   NetDeviceContainer devices = p2p.Install(sim.GetLeftNode(), sim.GetRightNode());
   Ipv4AddressHelper ipv4;

@@ -6,12 +6,18 @@
 using namespace ns3;
 
 // The QuicPointToPointHelper acts like the ns3::PointToPointHelper,
-// but it sets the PfifoFastQueueDisc queue size to 1, preventing the build-up
-// of traffic control layer queues and minimizing the impact on the latency.
-// Note that you can still set a network queue using PointToPointHelper::SetQueue.
+// but sets a ns3::DropTailQueue to one packet in order to minimize queueing latency.
+// Queues are simulated using a PfifoFastQueueDisc, with a default size of 100 packets.
+// The queue size can be set to a custom value using SetQueueSize().
 class QuicPointToPointHelper : public PointToPointHelper {
 public:
+  QuicPointToPointHelper();
+
+  // SetQueueSize sets the queue size for the PfifoFastQueueDisc
+  void SetQueueSize(StringValue);
   NetDeviceContainer Install(Ptr<Node> a, Ptr<Node> b);
+private:
+  StringValue queue_size_; // for the PfifoFastQueueDisc
 };
 
 #endif /* QUIC_POINT_TO_POINT_HELPER_H */
