@@ -117,4 +117,4 @@ Follow these steps to build a Docker image for your own QUIC implementation:
    docker run --cap-add=NET_ADMIN --network leftnet --hostname client --ip 192.168.0.100 -it --entrypoint /bin/bash my_quic_implementation
    ```
 
-For an example, have a look at the [quic-go Docker image](https://github.com/marten-seemann/quic-go-docker).
+For an example, have a look at the [quic-go setup](https://github.com/marten-seemann/quic-go-docker).
