@@ -44,26 +44,56 @@ After that, build and run the simulator:
 
 All paramters to `run.sh` are passed to waf, i.e. the command run inside the container will be `./waf --run "simple-p2p --delay=10ms --bandwidth=10Mbps"`.
 
-### Running the endpoints
+### Building your own QUIC endpoint
 
-The [endpoint](endpoint) directory contains the base docker image for an endpoint container. The built image is available on [dockerhub](https://hub.docker.com/r/martenseemann/quic-network-simulator-endpoint).
+The [endpoint](endpoint) directory contains the base docker image for an endpoint container. 
+The pre-built image is available on [dockerhub](https://hub.docker.com/r/martenseemann/quic-network-simulator-endpoint).
 
-If you want to build the endpoint image, you can do so by running
+When building a Docker image for your own QUIC implementation, there are two files you need to create: `Dockerfile` and `run_endpoint.sh`.
+Copy this Dockerfile and add the commands to build your QUIC implementation.
+```docker
+FROM martenseemann/quic-network-simulator-endpoint:latest
+
+# download and build your QUIC implementation
+# [ DO WORK HERE ]
+
+# copy run script and run it
+COPY run_endpoint.sh .
+RUN chmod +x run_endpoint.sh
+ENTRYPOINT [ "./run_endpoint.sh" ]
+```
+
+`run_endpoint.sh` could look like this:
 ```bash
-docker build endpoint/ -t endpoint
+# Set up the routing needed for the simulation.
+/setup.sh
+
+ROLE=$1
+shift
+
+if [ "$ROLE" == "client" ]; then
+    [ INSERT COMMAND TO RUN YOUR QUIC CLIENT ]
+elif [ "$ROLE" == "server" ]; then
+    [ INSERT COMMAND TO RUN YOUR QUIC SERVER ]
+fi
+```
+
+Build your image and assign a tag (`$YOURTAG`):
+```
+docker build . -t $YOURTAG
 ```
 
 Run the client:
 ```bash
-docker run --cap-add=NET_ADMIN --network leftnet --hostname client --ip 192.168.0.100 -it --entrypoint /bin/bash endpoint 
+docker run --cap-add=NET_ADMIN --network leftnet --hostname client --ip 192.168.0.100 -it --entrypoint /bin/bash $YOURTAG
 ```
 
 And the server:
 ```bash
-docker run --cap-add=NET_ADMIN --network rightnet --hostname server --ip 192.168.100.100 -it --entrypoint /bin/bash endpoint 
+docker run --cap-add=NET_ADMIN --network rightnet --hostname server --ip 192.168.100.100 -it --entrypoint /bin/bash $YOURTAG
 ```
 
-Note that in order to configure the containers to work in this simulation, you have to set up the routing by running (inside the container):
-```
-./setup
+For an example, have a look at the [quic-go Docker image](https://github.com/marten-seemann/quic-go-docker).
+```bash
+docker build . -t $YOURTAG
 ```
