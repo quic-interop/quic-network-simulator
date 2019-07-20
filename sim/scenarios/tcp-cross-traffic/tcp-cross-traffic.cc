@@ -44,19 +44,45 @@ int main(int argc, char *argv[]) {
   ipv4.SetBase("192.168.50.0", "255.255.255.0");
   Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
 
-  // Create a UDP packet source on the left node.
+  NodeContainer nodes;
+  nodes.Create(2);
+  InternetStackHelper internet;
+  internet.Install(nodes);
+  Ptr<Node> source_node = nodes.Get(1);
+  Ptr<Node> sink_node = nodes.Get(0);
+
+  QuicPointToPointHelper p2p_source;
+  p2p_source.SetDeviceAttribute("DataRate", StringValue("100Mbps"));
+  p2p_source.SetChannelAttribute("Delay", StringValue("1ms"));
+
+  NetDeviceContainer devices_source = p2p_source.Install(sim.GetRightNode(), source_node);
+  Ipv4AddressHelper ipv4_source;
+  ipv4_source.SetBase("192.168.49.0", "255.255.255.0");
+  Ipv4InterfaceContainer interfaces_source = ipv4_source.Assign(devices_source);
+
+  QuicPointToPointHelper p2p_sink;
+  p2p_sink.SetDeviceAttribute("DataRate", StringValue("100Mbps"));
+  p2p_sink.SetChannelAttribute("Delay", StringValue("1ms"));
+
+  NetDeviceContainer devices_sink = p2p_sink.Install(sink_node, sim.GetLeftNode());
+  Ipv4AddressHelper ipv4_sink;
+  ipv4_sink.SetBase("192.168.51.0", "255.255.255.0");
+  Ipv4InterfaceContainer interfaces_sink = ipv4_sink.Assign(devices_sink);
+
   uint16_t port = 9;   // Discard port (RFC 863)
-
   Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue (1448));
-  BulkSendHelper source("ns3::TcpSocketFactory", InetSocketAddress(interfaces.GetAddress(1), port));
+  BulkSendHelper source("ns3::TcpSocketFactory", InetSocketAddress(interfaces_sink.GetAddress(0), port));
   source.SetAttribute("MaxBytes", UintegerValue(0)); // unlimited
-  ApplicationContainer sourceApps = source.Install(sim.GetLeftNode());
-  sourceApps.Start(Seconds(0));
+  ApplicationContainer source_apps = source.Install(source_node);
+  source_apps.Start(Seconds(0));
 
-  // Create a sink to receive the packets on the right node.
   PacketSinkHelper sink("ns3::TcpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), port));
-  ApplicationContainer apps = sink.Install(sim.GetRightNode());
+  ApplicationContainer apps = sink.Install(sink_node);
   apps.Start(Seconds(0));
+
+  p2p_source.EnablePcapAll("trace-source");
+  p2p.EnablePcapAll("trace");
+  p2p_sink.EnablePcapAll("trace-sink");
 
   Simulator::Schedule(print_interval, &printBW, apps.Get(0)->GetObject<PacketSink>());
 
