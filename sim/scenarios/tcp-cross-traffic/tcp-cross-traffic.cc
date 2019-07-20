@@ -71,6 +71,12 @@ int main(int argc, char *argv[]) {
 
   uint16_t port = 9;   // Discard port (RFC 863)
   Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue (1448));
+  // use a large receive buffer, so that we don't become flow control blocked
+  Config::SetDefault("ns3::TcpSocket::RcvBufSize", UintegerValue (10*1024*1024));
+  // use a very large send buffer, otherwise ns3 will create sub-MTU size packets
+  Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue (100*1024*1024));
+  Config::SetDefault("ns3::TcpSocketBase::Sack", BooleanValue(true));
+  
   BulkSendHelper source("ns3::TcpSocketFactory", InetSocketAddress(interfaces_sink.GetAddress(0), port));
   source.SetAttribute("MaxBytes", UintegerValue(0)); // unlimited
   ApplicationContainer source_apps = source.Install(source_node);
