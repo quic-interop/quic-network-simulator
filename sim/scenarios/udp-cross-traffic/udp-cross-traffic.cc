@@ -30,17 +30,17 @@ int main(int argc, char *argv[]) {
   ipv4.SetBase("10.50.0.0", "255.255.0.0");
   Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
 
-  // Create a UDP packet source on the left node.
   uint16_t port = 9;   // Discard port (RFC 863)
-  OnOffHelper onoff("ns3::UdpSocketFactory", InetSocketAddress(interfaces.GetAddress(1), port));
+  // Create a sink to receive the packets on the left node.
+  PacketSinkHelper sink("ns3::UdpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), port));
+  sink.Install(sim.GetLeftNode()).Start(Seconds(20));
+
+  // Create a UDP packet source on the right node.
+  OnOffHelper onoff("ns3::UdpSocketFactory", InetSocketAddress(interfaces.GetAddress(0), port));
   onoff.SetConstantRate(DataRate(cross_data_rate));
-  onoff.Install(sim.GetLeftNode()).Start(Seconds(20));
+  onoff.Install(sim.GetRightNode()).Start(Seconds(20));
 
   p2p.EnablePcapAll("trace");
 
-  // Create a sink to receive the packets on the right node.
-  PacketSinkHelper sink("ns3::UdpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), port));
-  sink.Install(sim.GetRightNode()).Start(Seconds(20));
- 
   sim.Run(Seconds(36000));
 }
