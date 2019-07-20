@@ -9,6 +9,21 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("ns3 simulator");
 
+const Time print_interval = Seconds(5);
+
+void printBW(Ptr<PacketSink> sink) {
+  static uint64_t last_rec = 0;
+  static Time last_time;
+
+  uint64_t current = sink->GetTotalRx();
+  Time now = Simulator::Now();
+
+  std::cout << "Bandwidth: " << 8 * (current - last_rec) / ((now - last_time).GetSeconds() * 1000) << " Kbps" << std::endl;
+  last_time = now;
+  last_rec = current;
+  Simulator::Schedule(print_interval, &printBW, sink);
+}
+
 int main(int argc, char *argv[]) {
   std::string delay, bandwidth, queue;
   CommandLine cmd;
@@ -39,7 +54,10 @@ int main(int argc, char *argv[]) {
 
   // Create a sink to receive the packets on the right node.
   PacketSinkHelper sink("ns3::TcpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), port));
-  sink.Install(sim.GetRightNode()).Start(Seconds(0));
- 
+  ApplicationContainer apps = sink.Install(sim.GetRightNode());
+  apps.Start(Seconds(0));
+
+  Simulator::Schedule(print_interval, &printBW, apps.Get(0)->GetObject<PacketSink>());
+
   sim.Run(Seconds(36000));
 }
