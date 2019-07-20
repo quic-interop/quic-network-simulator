@@ -87,6 +87,8 @@ Follow these steps to build a Docker image for your own QUIC implementation:
 1. Now, copy the script below into `run_endpoint.sh`, and add commands as instructed.
 
     ```bash
+    #!/bin/bash
+    
     # Set up the routing needed for the simulation.
     /setup.sh
 
@@ -109,12 +111,12 @@ Follow these steps to build a Docker image for your own QUIC implementation:
 1. Typically, you'll want to run the server first:
 
    ```bash
-   docker run --cap-add=NET_ADMIN --network rightnet --hostname server --ip 192.168.100.100 -it my_quic_implementation
+   docker run --cap-add=NET_ADMIN --network rightnet --hostname server --ip 192.168.100.100 -it my_quic_implementation server
    ```
 
 1. And then the client:
    ```bash
-   docker run --cap-add=NET_ADMIN --network leftnet --hostname client --ip 192.168.0.100 -it my_quic_implementation
+   docker run --cap-add=NET_ADMIN --network leftnet --hostname client --ip 192.168.0.100 -it my_quic_implementation client
    ```
 
 For an example, have a look at the [quic-go setup](https://github.com/marten-seemann/quic-go-docker).
