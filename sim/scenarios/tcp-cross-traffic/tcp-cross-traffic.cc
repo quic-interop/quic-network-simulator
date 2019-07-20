@@ -46,7 +46,8 @@ int main(int argc, char *argv[]) {
 
   // Create a UDP packet source on the left node.
   uint16_t port = 9;   // Discard port (RFC 863)
-  
+
+  Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue (1448));
   BulkSendHelper source("ns3::TcpSocketFactory", InetSocketAddress(interfaces.GetAddress(1), port));
   source.SetAttribute("MaxBytes", UintegerValue(0)); // unlimited
   ApplicationContainer sourceApps = source.Install(sim.GetLeftNode());
