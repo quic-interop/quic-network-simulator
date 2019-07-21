@@ -125,18 +125,19 @@ setup](https://github.com/h2o/h2o-qns).
     ./run_sim.sh "simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25"
     ```
 
-1. With a network scenario running, you'll want to run the server next. There's
-   a convenience script provided for this purpose; you can call this and include
-   any parameters to your `run_endpoint.sh` script (which in turn can pass them
-   along to your server implementation):
+1. With a network scenario running, you'll want to run the server next.  A
+   convenience script is provided for this purpose that you can copy to your
+   directory. You can pass along any parameters to your `run_endpoint.sh` script
+   (which in turn can pass them along to your server implementation):
 
    ```bash
    ./run_server.sh my_quic_implementation [params]
    ```
 
-1. And then the client.  There's a convenience script provided for this purpose;
-   you can call this and include any parameters to your `run_endpoint.sh` script
-   (which in turn can pass them along to your client implementation):
+1. And then the client. A convenience script is provided for this purpose that
+   you can copy to your directory. You can pass along any parameters to your
+   `run_endpoint.sh` script (which in turn can pass them along to your client
+   implementation):
 
    ```bash
    ./run_server.sh my_quic_implementation [params]
