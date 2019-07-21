@@ -42,13 +42,6 @@ docker network create leftnet --subnet 192.168.0.0/24
 docker network create rightnet --subnet 192.168.100.0/24
 ```
 
-You will really not need to remove the networks, but if you want to, the
-networks can be removed by executing:
-
-```bash
-docker network rm leftnet rightnet
-```
-
 ## Building your own QUIC docker image
 
 The [endpoint](endpoint) directory contains the base Docker image for an
@@ -119,27 +112,31 @@ setup](https://github.com/marten-seemann/quic-go-docker).
    * [Single TCP connection running over a configurable point-to-point link](sim/scenarios/tcp-cross-traffic)
 
 
-    The provided `run.sh` script builds the simulator Docker container and runs
+    The provided `run_sim.sh` script builds the simulator Docker container and runs
     the specified scenario. Build and run a scenario as follows:
 
     ```bash
-    ./run.sh "[scenario-name] [scenario-specific parameters]"
+    ./run_sim.sh "[scenario-name] [scenario-specific parameters]"
     ```
 
     For example, the following command would run a simple point-to-point scenario:
     ```bash
-    ./run.sh "simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25"
+    ./run_sim.sh "simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25"
     ```
 
-1. With a network scenario running, you'll want to run the server next:
+1. With a network scenario running, you'll want to run the server next. There's
+   a convenience script provided for this purpose; you can call this and include
+   any parameters to your `run_endpoint.sh` script (which in turn can pass them
+   along to your server implementation):
 
    ```bash
-   docker run --cap-add=NET_ADMIN --network rightnet --hostname server \
-    --ip 192.168.100.100 -it my_quic_implementation server
+   ./run_server.sh my_quic_implementation [params]
    ```
 
-1. And then the client:
+1. And then the client.  There's a convenience script provided for this purpose;
+   you can call this and include any parameters to your `run_endpoint.sh` script
+   (which in turn can pass them along to your client implementation):
+
    ```bash
-   docker run --cap-add=NET_ADMIN --network leftnet --hostname client \
-    --ip 192.168.0.100 -it my_quic_implementation client
+   ./run_server.sh my_quic_implementation [params]
    ```
