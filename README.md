@@ -116,7 +116,7 @@ setup](https://github.com/marten-seemann/quic-go-docker).
     the specified scenario. Build and run a scenario as follows:
 
     ```bash
-    ./run_sim.sh "[scenario-name] [scenario-specific parameters]"
+    ./run_sim.sh "[scenario name] [scenario-specific parameters]"
     ```
 
     For example, the following command would run a simple point-to-point scenario:
