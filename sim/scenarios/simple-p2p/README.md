@@ -1,7 +1,20 @@
-# Simple point-to-point link
+# Simple Point-to-Point Link
 
-This scenario builds a network with a simple link, with the following
-configurable properties:
+This scenario builds a network with a simple configurable link, which is the
+bottleneck link in the network. You can use this scenario to test your
+implementation's performance under various bandwidth and delay
+conditions. Importantly, you can set the queue size at the bottleneck link. This
+enables a congestion controller to determine network bandwidth by witnessing
+either queueing delay increases or loss when the queue is full.
+
+This scenario can be used to compare your QUIC implementation's throughput when
+competing with external traffic sources. For example, you can run iperf
+alongside your client and server (within the same docker containers), to test
+your QUIC implementation's performance when competing with one or multiple flows
+of the host's TCP. NOTE: iperf sends traffic from the iperf client to the iperf
+server.
+
+This scenario has the following configurable properties:
 
 * `--delay`: One-way delay of network. Specify with units. This is a required
   parameter. For example `--delay=15ms`.

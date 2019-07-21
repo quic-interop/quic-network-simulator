@@ -98,7 +98,8 @@ Follow these steps to build a Docker image for your own QUIC implementation:
    implementation or either of the two files above.
 
 For an example, have a look at the [quic-go
-setup](https://github.com/marten-seemann/quic-go-docker).
+setup](https://github.com/marten-seemann/quic-go-docker) or the [quicly
+setup](https://github.com/h2o/h2o-qns).
 
 
 ## Running a Simulation
