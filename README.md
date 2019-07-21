@@ -15,8 +15,8 @@ The framework uses three docker images: the network simulator (as found in the
 
 The framework uses two networks on the host machine: `leftnet` (192.168.0.0/24)
 and `rightnet` (192.168.100.0/24). `leftnet` is connected to the client docker
-image, and `rightnet` is connected to the server. The ns-3 simulation sits in the
-middle and forwards packets between `leftnet` and `rightnet`.
+image, and `rightnet` is connected to the server. The ns-3 simulation sits in
+the middle and forwards packets between `leftnet` and `rightnet`.
 
 ```
                                       |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
@@ -33,35 +33,27 @@ middle and forwards packets between `leftnet` and `rightnet`.
 
 ## Setting up the networks
 
-To set up `leftnet` and `rightnet`, run the following commands:
+You need to set up the networks in docker once, and then docker remembers them
+forever.  These networks are required for running the simulator (as described
+below). To set up `leftnet` and `rightnet`, run the following commands:
 
 ```bash
 docker network create leftnet --subnet 192.168.0.0/24
 docker network create rightnet --subnet 192.168.100.0/24
 ```
 
-The networks can be removed by executing:
+You will really not need to remove the networks, but if you want to, the
+networks can be removed by executing:
 
 ```bash
 docker network rm leftnet rightnet
 ```
 
-## Running the simulator
+## Building your own QUIC docker image
 
-To run the simulator, you need to set up the networks first, as described above.
-After that, build and run the simulator:
-
-```bash
-./run.sh "simple-p2p --delay=10ms --bandwidth=10Mbps"
-```
-
-All paramters to `run.sh` are passed to waf, i.e. the command run inside the
-container will be `./waf --run "simple-p2p --delay=10ms --bandwidth=10Mbps"`.
-
-## Building your own QUIC endpoint
-
-The [endpoint](endpoint) directory contains the base docker image for an
-endpoint container.  The pre-built image is available on
+The [endpoint](endpoint) directory contains the base Docker image for an
+endpoint Docker container.  The pre-built image of this container is available
+on
 [dockerhub](https://hub.docker.com/r/martenseemann/quic-network-simulator-endpoint).
 
 Follow these steps to build a Docker image for your own QUIC implementation:
@@ -89,7 +81,7 @@ Follow these steps to build a Docker image for your own QUIC implementation:
     ```bash
     #!/bin/bash
     
-    # Set up the routing needed for the simulation.
+    # Set up the routing needed for the simulation
     /setup.sh
 
     ROLE=$1
@@ -102,21 +94,52 @@ Follow these steps to build a Docker image for your own QUIC implementation:
     fi
     ```
 
-1. From inside the directory, build your image and assign a tag. For example, "my_quic_implementation":
+1. From inside the directory, build your image and assign a tag. For example,
+   "my_quic_implementation":
 
    ```
    docker build . -t my_quic_implementation
    ```
 
-1. Typically, you'll want to run the server first:
+   You will need to run this build command any time you change your
+   implementation or either of the two files above.
+
+For an example, have a look at the [quic-go
+setup](https://github.com/marten-seemann/quic-go-docker).
+
+
+## Running a Simulation
+
+1. You will want to run the simulator with a scenario first, so that the network
+   scenario is set up before you run your client and server. The scenarios that
+   are currently provided are listed below:
+   
+   * [Simple point-to-point link, with configurable link properties](sim/scenarios/simple-p2p)
+
+   * [Single TCP connection running over a configurable point-to-point link](sim/scenarios/tcp-cross-traffic)
+
+
+    The provided `run.sh` script builds the simulator Docker container and runs
+    the specified scenario. Build and run a scenario as follows:
+
+    ```bash
+    ./run.sh "[scenario-name] [scenario-specific parameters]"
+    ```
+
+    For example, the following command would run a simple point-to-point scenario:
+    ```bash
+    ./run.sh "simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25"
+    ```
+
+1. With a network scenario running, you'll want to run the server next:
 
    ```bash
-   docker run --cap-add=NET_ADMIN --network rightnet --hostname server --ip 192.168.100.100 -it my_quic_implementation server
+   docker run --cap-add=NET_ADMIN --network rightnet --hostname server \
+    --ip 192.168.100.100 -it my_quic_implementation server
    ```
 
 1. And then the client:
    ```bash
-   docker run --cap-add=NET_ADMIN --network leftnet --hostname client --ip 192.168.0.100 -it my_quic_implementation client
+   docker run --cap-add=NET_ADMIN --network leftnet --hostname client \
+    --ip 192.168.0.100 -it my_quic_implementation client
    ```
-
-For an example, have a look at the [quic-go setup](https://github.com/marten-seemann/quic-go-docker).
