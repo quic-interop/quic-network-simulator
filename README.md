@@ -139,5 +139,5 @@ setup](https://github.com/h2o/h2o-qns).
    can pass them along to your client implementation):
 
    ```bash
-   ./run_server.sh my_quic_implementation [params]
+   ./run_client.sh my_quic_implementation [params]
    ```
