@@ -126,18 +126,17 @@ setup](https://github.com/h2o/h2o-qns).
     ```
 
 1. With a network scenario running, you'll want to run the server next.  A
-   convenience script is provided for this purpose that you can copy to your
-   directory. You can pass along any parameters to your `run_endpoint.sh` script
-   (which in turn can pass them along to your server implementation):
+   convenience script is provided for this purpose. You can pass along any
+   parameters to your `run_endpoint.sh` script (which in turn can pass them
+   along to your server implementation):
 
    ```bash
    ./run_server.sh my_quic_implementation [params]
    ```
 
-1. And then the client. A convenience script is provided for this purpose that
-   you can copy to your directory. You can pass along any parameters to your
-   `run_endpoint.sh` script (which in turn can pass them along to your client
-   implementation):
+1. And then the client. A convenience script is provided for this purpose. You
+   can pass along any parameters to your `run_endpoint.sh` script (which in turn
+   can pass them along to your client implementation):
 
    ```bash
    ./run_server.sh my_quic_implementation [params]
