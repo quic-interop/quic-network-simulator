@@ -16,6 +16,10 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("queue", "queue size of the p2p link (in packets)", queue);
   cmd.Parse (argc, argv);
 
+  NS_ABORT_MSG_IF(delay.length() == 0, "Missing parameter: delay");
+  NS_ABORT_MSG_IF(bandwidth.length() == 0, "Missing parameter: bandwidth");
+  NS_ABORT_MSG_IF(queue.length() == 0, "Missing parameter: queue");
+
   QuicNetworkSimulatorHelper sim;
 
   // Stick in the point-to-point line between the sides.

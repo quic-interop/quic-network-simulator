@@ -18,6 +18,11 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("crossdatarate", "data rate of the cross traffic", cross_data_rate);
   cmd.Parse (argc, argv);
 
+  NS_ABORT_MSG_IF(delay.length() == 0, "Missing parameter: delay");
+  NS_ABORT_MSG_IF(bandwidth.length() == 0, "Missing parameter: bandwidth");
+  NS_ABORT_MSG_IF(queue.length() == 0, "Missing parameter: queue");
+  NS_ABORT_MSG_IF(cross_data_rate.length() == 0, "Missing parameter: crossdatarate");
+
   QuicNetworkSimulatorHelper sim;
 
   QuicPointToPointHelper p2p;
