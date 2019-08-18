@@ -34,6 +34,11 @@ This scenario has the following configurable properties:
   `on` seconds, block it for `off` seconds, allow it for `on` seconds, block it
   for `off` seconds, and then allow traffic indefinitely.
 
+* `--direction`: Specifiy the direction in which to block traffic. This is an 
+  optional parameter. Valid values are `both`, `toclient` and `toserver`, to block
+  traffic in both directions, traffic flowing towards, or traffic flowing towards the
+  server, respectively. Defaults to `both`.
+
 
 
 For example,

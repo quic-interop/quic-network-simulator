@@ -31,7 +31,7 @@ void disable(Ptr<BlackholeErrorModel> em, const Time next, const int repeat) {
 }
 
 int main(int argc, char *argv[]) {
-  std::string delay, bandwidth, queue, on, off, repeat_s;
+  std::string delay, bandwidth, queue, on, off, repeat_s, drop_direction_s;
   CommandLine cmd;
   cmd.AddValue("delay", "delay of the p2p link", delay);
   cmd.AddValue("bandwidth", "bandwidth of the p2p link", bandwidth);
@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("on", "time that the connection is active (e.g. 15s)", on);
   cmd.AddValue("off", "time that the connection is dropping all packets (e.g. 2s)", off);
   cmd.AddValue("repeat", "(optional) turn the connection on and off this many times. Default: 1", repeat_s);
+  cmd.AddValue("direction", "(optional) [ both, toclient, toserver ] direction in which to drop packet. Default: both", drop_direction_s);
   cmd.Parse (argc, argv);
 
   NS_ABORT_MSG_IF(delay.length() == 0, "Missing parameter: delay");
@@ -52,6 +53,16 @@ int main(int argc, char *argv[]) {
     repeat = std::stoi(repeat_s);
   }
   NS_ABORT_MSG_IF(repeat <= 0, "Invalid value: repeat value must be greater than zero.");
+
+  enum drop_direction { both, to_client, to_server };
+
+  drop_direction drop_dir = both;
+  if(drop_direction_s.length() > 0) {
+    if(drop_direction_s == "toclient") drop_dir = to_client;
+    else if(drop_direction_s == "toserver") drop_dir = to_server;
+    else if(drop_direction_s == "both") drop_dir = both;
+    else NS_ABORT_MSG("Invalid directon value.");
+  }
 
   QuicNetworkSimulatorHelper sim;
 
@@ -68,7 +79,12 @@ int main(int argc, char *argv[]) {
 
   Ptr<BlackholeErrorModel> em = CreateObject<BlackholeErrorModel>();
   em->Disable();
-  devices.Get(0)->SetAttribute("ReceiveErrorModel", PointerValue(em));
+  if(drop_dir == to_client || drop_dir == both) {
+    devices.Get(0)->SetAttribute("ReceiveErrorModel", PointerValue(em));
+  }
+  if(drop_dir == to_server || drop_dir == both) {
+    devices.Get(1)->SetAttribute("ReceiveErrorModel", PointerValue(em));
+  }
 
   Time intv = Time(on) + Time(off);
   Simulator::Schedule(Time(on), &enable, em, intv, repeat);
