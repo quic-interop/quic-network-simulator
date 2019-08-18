@@ -15,7 +15,7 @@ void enable(Ptr<BlackholeErrorModel> em, const Time next, const int repeat) {
   counter++;
   std::cout << Simulator::Now().GetSeconds() << "s: Enabling blackhole" << std::endl;
   em->Enable();
-  if(repeat > 0 && counter < repeat) {
+  if(counter < repeat) {
     Simulator::Schedule(next, &enable, em, next, repeat);
   }
 }
@@ -25,7 +25,7 @@ void disable(Ptr<BlackholeErrorModel> em, const Time next, const int repeat) {
   std::cout << Simulator::Now().GetSeconds() << "s: Disabling blackhole" << std::endl;
   counter++;
   em->Disable();
-  if(repeat > 0 && counter < repeat) {
+  if(counter < repeat) {
     Simulator::Schedule(next, &disable, em, next, repeat);
   }
 }
@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
   if(repeat_s.length() > 0) {
     repeat = std::stoi(repeat_s);
   }
+  NS_ABORT_MSG_IF(repeat <= 0, "Invalid value: repeat value must be greater than zero.");
 
   QuicNetworkSimulatorHelper sim;
 
