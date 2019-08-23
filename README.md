@@ -141,3 +141,12 @@ setup](https://github.com/h2o/h2o-qns).
    ```bash
    ./run_client.sh my_quic_implementation [params]
    ```
+
+## Debugging and FAQs
+
+1. With the server running, you can get a root shell in the server docker
+   container using the following (similarly for the client):
+
+   ```bash
+   docker exec -it server /bin/bash
+   ```
