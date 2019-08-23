@@ -1,0 +1,26 @@
+version: '3.7'
+services:
+
+    sim:
+        build: ./sim
+        image: sim
+        cap_add:
+            - NET_ADMIN
+ 
+    server:
+        build: ./h2o-qns
+        image: quicly
+        cap_add:
+            - NET_ADMIN
+        depends_on:
+            - sim
+        command: ./run_server quicly
+
+    client:
+        build: ./h2o-qns
+        cap_add:
+            - NET_ADMIN
+        depends_on:
+            - sim
+            - server
+        command: ./run_client quicly
