@@ -19,9 +19,7 @@ void DroplistErrorModel::DoReset(void) { }
  
 bool DroplistErrorModel::DoCorrupt(Ptr<Packet> p) {
   static int packet_num = 0;
-  if (drops.empty())
-      return 0;
-  return drops.find(++packet_num) != drops.end();
+  return drops.empty() ? 0 : drops.find(++packet_num) != drops.end();
 }
 
 void DroplistErrorModel::SetDrops(string drops_in) {
