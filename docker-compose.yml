@@ -15,6 +15,5 @@ services:
             - sim
         cap_add:
             - NET_ADMIN
-        network_mode: "rightnet"
         hostname: server
         ip: 192.168.100.100       
