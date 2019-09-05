@@ -1,0 +1,60 @@
+version: "3.7"
+
+services:
+  sim:
+    build: ./sim
+    image: sim
+    container_name: sim
+    hostname: sim
+    environment:
+      - SCENARIO=$SCENARIO
+    cap_add: 
+      - NET_ADMIN
+    networks:
+      leftnet:
+        ipv4_address: 192.168.0.2
+      rightnet:
+        ipv4_address: 192.168.100.2
+
+  server:
+    build: .
+    container_name: server
+    hostname: server
+    environment:
+      - ROLE=server
+      - SERVER_PARAMS=$SERVER_PARAMS
+    depends_on:
+      - sim
+    cap_add: 
+      - NET_ADMIN
+    networks:
+      rightnet:
+        ipv4_address: 192.168.100.100
+
+  client:
+    build: .
+    container_name: client
+    hostname: client
+    environment:
+      - ROLE=client
+      - CLIENT_PARAMS=$CLIENT_PARAMS
+    depends_on:
+      - sim
+      - server
+    cap_add: 
+      - NET_ADMIN
+    networks:
+      leftnet:
+        ipv4_address: 192.168.0.100
+
+networks:
+  leftnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+  rightnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
