@@ -109,7 +109,7 @@ Follow these steps to set up your own QUIC implementation:
    tag. For example, "my_quic_implementation":
 
    ```
-   docker build my_imp_dir -t my_quic_implementation
+   docker build my_impl_dir -t my_quic_implementation
    ```
 
    Note that you will need to run this build command any time you change your
