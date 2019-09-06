@@ -20,6 +20,8 @@ services:
     build: .
     container_name: server
     hostname: server
+    volumes:
+      - ./qnslogs:/qnslogs
     environment:
       - ROLE=server
       - SERVER_PARAMS=$SERVER_PARAMS
@@ -35,6 +37,8 @@ services:
     build: .
     container_name: client
     hostname: client
+    volumes:
+      - ./qnslogs:/qnslogs
     environment:
       - ROLE=client
       - CLIENT_PARAMS=$CLIENT_PARAMS

@@ -62,7 +62,7 @@ Follow these steps to set up your own QUIC implementation:
     ```
 
 1. Now, copy the script below into `run_endpoint.sh`, and add commands as
-   instructed. Logs should be recorded in `/qnslogs/` for them to be available
+   instructed. Logs should be recorded in `/qnslogs` for them to be available
    after simulation completion (more on this later). Note that we insert a 10
    second sleep at the client because we currently have no synchronization, but
    we need the server and simulator to be running before the client.
@@ -153,9 +153,9 @@ specifies a command line parameter for the client implementation:
 
 
 A mounted directory, `qnslogs`, is provided for recording logs from the
-endpoints. This directory is created by the `run_server.sh` and `run_client.sh`
-in the directories from which these scripts are run. Inside the docker
-container, the directory is available as `/qnslogs/`.
+endpoints. This directory is created by docker-compose in the directory from
+which it is run. Inside the docker container, the directory is available as
+`/qnslogs`.
 
 
 ## Debugging and FAQs
