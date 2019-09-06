@@ -69,7 +69,9 @@ Follow these steps to build a Docker image for your own QUIC implementation:
     ENTRYPOINT [ "./run_endpoint.sh" ]
     ```
 
-1. Now, copy the script below into `run_endpoint.sh`, and add commands as instructed.
+1. Now, copy the script below into `run_endpoint.sh`, and add commands as
+   instructed. Logs should be recorded in `/qnslogs/` for them to be available
+   after simulation completion (more on this later).
 
     ```bash
     #!/bin/bash
@@ -141,6 +143,12 @@ setup](https://github.com/h2o/h2o-qns).
    ```bash
    ./run_client.sh my_quic_implementation [params]
    ```
+
+A mounted directory, `qnslogs`, is provided for recording logs from the
+endpoints. This directory is created by the `run_server.sh` and `run_client.sh`
+in the directories from which these scripts are run. Inside the docker
+container, the directory is available as `/qnslogs/`.
+
 
 ## Debugging and FAQs
 
