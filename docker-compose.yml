@@ -17,9 +17,11 @@ services:
         ipv4_address: 192.168.100.2
 
   server:
-    build: .
+    build: ./$SERVER
+    image: $SERVER
     container_name: server
     hostname: server
+    privileged: true
     volumes:
       - ./qnslogs:/qnslogs
     environment:
@@ -34,9 +36,11 @@ services:
         ipv4_address: 192.168.100.100
 
   client:
-    build: .
+    build: ./$CLIENT
+    image: $CLIENT
     container_name: client
     hostname: client
+    privileged: true
     volumes:
       - ./qnslogs:/qnslogs
     environment:
