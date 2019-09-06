@@ -9,9 +9,10 @@ between the client and server to flow through the simulated network.
 
 ## Framework
 
-The framework uses three docker images: the network simulator (as found in the
-[sim](sim) directory), and a client and a server (as found in the
-[endpoint](endpoint) directory).
+The framework uses docker-compose to compose three docker images: the network
+simulator (as found in the [sim](sim) directory), and a client and a server (as
+found in the individual QUIC implementation directories, or for a simple shell,
+the [endpoint](endpoint) directory).
 
 The framework uses two networks on the host machine: `leftnet` (192.168.0.0/24)
 and `rightnet` (192.168.100.0/24). `leftnet` is connected to the client docker
@@ -31,16 +32,6 @@ the middle and forwards packets between `leftnet` and `rightnet`.
                                       |__________________________________________________|
 ```
 
-## Setting up the networks
-
-You need to set up the networks in docker once, and then docker remembers them
-forever.  These networks are required for running the simulator (as described
-below). To set up `leftnet` and `rightnet`, run the following commands:
-
-```bash
-docker network create leftnet --subnet 192.168.0.0/24
-docker network create rightnet --subnet 192.168.100.0/24
-```
 
 ## Building your own QUIC docker image
 
@@ -49,10 +40,11 @@ endpoint Docker container.  The pre-built image of this container is available
 on
 [dockerhub](https://hub.docker.com/r/martenseemann/quic-network-simulator-endpoint).
 
-Follow these steps to build a Docker image for your own QUIC implementation:
+Follow these steps to set up your own QUIC implementation:
 
-1. Create a new directory for your implementation. You will create two files in
-   this directory: `Dockerfile` and `run_endpoint.sh`, as described below.
+1. Create a new directory for your implementation (say, my_impl_dir). You will
+   create four files in this directory: `Dockerfile`, `run_endpoint.sh`,
+   `server.yml`, and `client.yml` as described below.
 
 1.  Copy the Dockerfile below and add the commands to build your QUIC
     implementation.
@@ -70,8 +62,10 @@ Follow these steps to build a Docker image for your own QUIC implementation:
     ```
 
 1. Now, copy the script below into `run_endpoint.sh`, and add commands as
-   instructed. Logs should be recorded in `/qnslogs/` for them to be available
-   after simulation completion (more on this later).
+   instructed. Logs should be recorded in `/qnslogs` for them to be available
+   after simulation completion (more on this later). Note that we insert a 10
+   second sleep at the client because we currently have no synchronization, but
+   we need the server and simulator to be running before the client.
 
     ```bash
     #!/bin/bash
@@ -79,25 +73,47 @@ Follow these steps to build a Docker image for your own QUIC implementation:
     # Set up the routing needed for the simulation
     /setup.sh
 
-    ROLE=$1
-    shift
+    # The following variables are available for use:
+    # - ROLE contains the role of this execution context, client or server
+    # - SERVER_PARAMS contains user-supplied command line parameters
+    # - CLIENT_PARAMS contains user-supplied command line parameters
 
     if [ "$ROLE" == "client" ]; then
+        sleep 10     
         [ INSERT COMMAND TO RUN YOUR QUIC CLIENT ]
     elif [ "$ROLE" == "server" ]; then
         [ INSERT COMMAND TO RUN YOUR QUIC SERVER ]
     fi
     ```
 
-1. From inside the directory, build your image and assign a tag. For example,
-   "my_quic_implementation":
+1. Next, you need to create your custom YAML files that will be used by
+   docker-compose to bring up your server or client. Copy the following into
+   `server.yml` file.
+
+    ```yaml
+    version: "3.7"
+    services:
+        server:
+            image: my_quic_implementation
+    ```
+
+    And the following into a `client.yml` file:
+    ```yaml
+    version: "3.7"
+    services:
+        client:
+            image: my_quic_implementation
+    ```
+
+1. Finally, from the quic-network-simulator directory, build your image and assign a
+   tag. For example, "my_quic_implementation":
 
    ```
-   docker build . -t my_quic_implementation
+   docker build my_impl_dir -t my_quic_implementation
    ```
 
-   You will need to run this build command any time you change your
-   implementation or either of the two files above.
+   Note that you will need to run this build command any time you change your
+   implementation, the Dockerfile, or the `run_endpoint.sh` file.
 
 For an example, have a look at the [quic-go
 setup](https://github.com/marten-seemann/quic-go-docker) or the [quicly
@@ -106,54 +122,46 @@ setup](https://github.com/h2o/h2o-qns).
 
 ## Running a Simulation
 
-1. You will want to run the simulator with a scenario first, so that the network
-   scenario is set up before you run your client and server. The scenarios that
-   are currently provided are listed below:
+You will want to run the setup with a scenario. The scenarios that are currently
+provided are listed below:
    
-   * [Simple point-to-point link, with configurable link properties](sim/scenarios/simple-p2p)
+* [Simple point-to-point link, with configurable link properties](sim/scenarios/simple-p2p)
 
-   * [Single TCP connection running over a configurable point-to-point link](sim/scenarios/tcp-cross-traffic)
+* [Single TCP connection running over a configurable point-to-point link](sim/scenarios/tcp-cross-traffic)
 
+You can now run the experiment as follows:
+```
+   CLIENT_PARAMS=[params to client] \
+   SERVER_PARAMS=[params to server] \
+   SCENARIO=[scenario] \
+   docker-compose -f base.yml \
+        -f [server_image]/server.yml \
+        -f [client_image]/client.yml \
+        up
+```
 
-    The provided `run_sim.sh` script builds the simulator Docker container and runs
-    the specified scenario. Build and run a scenario as follows:
+For instance, the following command runs a simple point-to-point scenario, and
+specifies a command line parameter for the client implementation:
+```
+   CLIENT_PARAMS="-p /10000.txt" \
+   SCENARIO="simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25" \
+   docker-compose -f base.yml \
+        -f my_quic_implementation/server.yml \
+        -f another_quic_impl/client.yml \
+        up
+```
 
-    ```bash
-    ./run_sim.sh "[scenario name] [scenario-specific parameters]"
-    ```
-
-    For example, the following command would run a simple point-to-point scenario:
-    ```bash
-    ./run_sim.sh "simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25"
-    ```
-
-1. With a network scenario running, you'll want to run the server next.  A
-   convenience script is provided for this purpose. You can pass along any
-   parameters to your `run_endpoint.sh` script (which in turn can pass them
-   along to your server implementation):
-
-   ```bash
-   ./run_server.sh my_quic_implementation [params]
-   ```
-
-1. And then the client. A convenience script is provided for this purpose. You
-   can pass along any parameters to your `run_endpoint.sh` script (which in turn
-   can pass them along to your client implementation):
-
-   ```bash
-   ./run_client.sh my_quic_implementation [params]
-   ```
 
 A mounted directory, `qnslogs`, is provided for recording logs from the
-endpoints. This directory is created by the `run_server.sh` and `run_client.sh`
-in the directories from which these scripts are run. Inside the docker
-container, the directory is available as `/qnslogs/`.
+endpoints. This directory is created by docker-compose in the directory from
+which it is run. Inside the docker container, the directory is available as
+`/qnslogs`.
 
 
 ## Debugging and FAQs
 
-1. With the server running, you can get a root shell in the server docker
-   container using the following (similarly for the client):
+1. With the server (similarly for the client) up and running, you can get a root
+   shell in the server docker container using the following:
 
    ```bash
    docker exec -it server /bin/bash

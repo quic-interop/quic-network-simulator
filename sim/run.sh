@@ -18,4 +18,5 @@ ifconfig eth1 promisc
 iptables -A FORWARD -i eth0 -o eth1 -j DROP
 iptables -A FORWARD -i eth1 -o eth0 -j DROP
 
-./waf --run "$1"
+echo "Using scenario:" $SCENARIO
+./waf --run "$SCENARIO"
