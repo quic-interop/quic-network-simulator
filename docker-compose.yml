@@ -6,6 +6,8 @@ services:
     image: sim
     container_name: sim
     hostname: sim
+    stdin_open: true
+    tty: true
     environment:
       - SCENARIO=$SCENARIO
     cap_add: 
@@ -22,6 +24,8 @@ services:
     container_name: server
     hostname: server
     privileged: true
+    stdin_open: true
+    tty: true
     volumes:
       - ./qnslogs:/qnslogs
     environment:
@@ -41,6 +45,8 @@ services:
     container_name: client
     hostname: client
     privileged: true
+    stdin_open: true
+    tty: true
     volumes:
       - ./qnslogs:/qnslogs
     environment:

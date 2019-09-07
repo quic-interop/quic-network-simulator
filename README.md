@@ -42,9 +42,9 @@ on
 
 Follow these steps to set up your own QUIC implementation:
 
-1. Create a new directory for your implementation (say, my_impl_dir). You will
-   create four files in this directory: `Dockerfile`, `run_endpoint.sh`,
-   `server.yml`, and `client.yml` as described below.
+1. Create a new directory for your implementation (say, my_quic_impl). You will
+   create two files in this directory: `Dockerfile` and `run_endpoint.sh`, as
+   described below.
 
 1.  Copy the Dockerfile below and add the commands to build your QUIC
     implementation.
@@ -86,34 +86,17 @@ Follow these steps to set up your own QUIC implementation:
     fi
     ```
 
-1. Next, you need to create your custom YAML files that will be used by
-   docker-compose to bring up your server or client. Copy the following into
-   `server.yml` file.
-
-    ```yaml
-    version: "3.7"
-    services:
-        server:
-            image: my_quic_implementation
-    ```
-
-    And the following into a `client.yml` file:
-    ```yaml
-    version: "3.7"
-    services:
-        client:
-            image: my_quic_implementation
-    ```
-
-1. Finally, from the quic-network-simulator directory, build your image and assign a
-   tag. For example, "my_quic_implementation":
+1. Finally, from the quic-network-simulator directory, build your image and
+   assign it a tag. IMPORTANT: Use the same name for the tag as you did for your
+   directory, else docker-compose will fail. In our example, this would be
+   "my_quic_impl":
 
    ```
-   docker build my_impl_dir -t my_quic_implementation
+   docker build my_quic_impl/ -t my_quic_impl
    ```
 
    Note that you will need to run this build command any time you change your
-   implementation, the Dockerfile, or the `run_endpoint.sh` file.
+   implementation or either of the files described above.
 
 For an example, have a look at the [quic-go
 setup](https://github.com/marten-seemann/quic-go-docker) or the [quicly
@@ -131,26 +114,27 @@ provided are listed below:
 
 You can now run the experiment as follows:
 ```
+   CLIENT=[client directory name] \
    CLIENT_PARAMS=[params to client] \
+   SERVER=[server directory name] \
    SERVER_PARAMS=[params to server] \
    SCENARIO=[scenario] \
-   docker-compose -f base.yml \
-        -f [server_image]/server.yml \
-        -f [client_image]/client.yml \
-        up
+   docker-compose up
 ```
 
-For instance, the following command runs a simple point-to-point scenario, and
-specifies a command line parameter for the client implementation:
+SERVER_PARAMS and CLIENT_PARAMS may be omitted if the corresponding QUIC
+implementations do not require them.
+
+For instance, the following command runs a simple point-to-point scenario and
+specifies a command line parameter for only the client implementation:
+
 ```
+   CLIENT="my_quic_impl" \
    CLIENT_PARAMS="-p /10000.txt" \
+   SERVER="another_quic_impl" \
    SCENARIO="simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25" \
-   docker-compose -f base.yml \
-        -f my_quic_implementation/server.yml \
-        -f another_quic_impl/client.yml \
-        up
+   docker-compose up
 ```
-
 
 A mounted directory, `qnslogs`, is provided for recording logs from the
 endpoints. This directory is created by docker-compose in the directory from
