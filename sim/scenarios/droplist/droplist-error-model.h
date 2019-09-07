@@ -18,6 +18,7 @@ class DroplistErrorModel : public ErrorModel {
     
  private:
     std::set<int> drops;
+    int packet_num;
     bool DoCorrupt (Ptr<Packet> p);
     void DoReset(void);
 };

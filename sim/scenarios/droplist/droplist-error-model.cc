@@ -12,12 +12,12 @@ TypeId DroplistErrorModel::GetTypeId(void) {
     return tid;
 }
  
-DroplistErrorModel::DroplistErrorModel() { }
+DroplistErrorModel::DroplistErrorModel()
+    : packet_num(0) { }
 
 void DroplistErrorModel::DoReset(void) { }
  
 bool DroplistErrorModel::DoCorrupt(Ptr<Packet> p) {
-    static int packet_num = 0;
     if(drops.find(++packet_num) == drops.end())
         return false;
     cout << "Dropping packet number " << packet_num << endl;
