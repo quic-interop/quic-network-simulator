@@ -12,7 +12,8 @@ TypeId DroplistErrorModel::GetTypeId(void) {
     return tid;
 }
  
-DroplistErrorModel::DroplistErrorModel() { }
+DroplistErrorModel::DroplistErrorModel()
+    : packet_num(0) { }
 
 void DroplistErrorModel::DoReset(void) { }
  
