@@ -86,18 +86,6 @@ Follow these steps to set up your own QUIC implementation:
     fi
     ```
 
-1. Finally, from the quic-network-simulator directory, build your image and
-   assign it a tag. IMPORTANT: Use the same name for the tag as you did for your
-   directory, else docker-compose will fail. In our example, this would be
-   "my_quic_impl":
-
-   ```
-   docker build my_quic_impl/ -t my_quic_impl
-   ```
-
-   Note that you will need to run this build command any time you change your
-   implementation or either of the files described above.
-
 For an example, have a look at the [quic-go
 setup](https://github.com/marten-seemann/quic-go-docker) or the [quicly
 setup](https://github.com/h2o/h2o-qns).
@@ -105,41 +93,60 @@ setup](https://github.com/h2o/h2o-qns).
 
 ## Running a Simulation
 
-You will want to run the setup with a scenario. The scenarios that are currently
-provided are listed below:
+1. From the quic-network-simulator directory, first build the necessary images:
+
+   ```
+   CLIENT=[client directory name] \
+   SERVER=[server directory name] \
+   docker-compose build
+   ```
+
+   Note that you will need to run this build command any time you change either
+   implementation, either `Dockerfile`, or either `run_endpoint.sh` file.
+
+   For instance:
+
+   ```
+   CLIENT="my_quic_impl" \
+   SERVER="another_quic_impl" \
+   docker-compose build
+   ```
+
+1. You will want to run the setup with a scenario. The scenarios that are
+   currently provided are listed below:
    
-* [Simple point-to-point link, with configurable link properties](sim/scenarios/simple-p2p)
+   * [Simple point-to-point link, with configurable link properties](sim/scenarios/simple-p2p)
 
-* [Single TCP connection running over a configurable point-to-point link](sim/scenarios/tcp-cross-traffic)
+   * [Single TCP connection running over a configurable point-to-point link](sim/scenarios/tcp-cross-traffic)
 
-You can now run the experiment as follows:
-```
+   You can now run the experiment as follows:
+   ```
    CLIENT=[client directory name] \
    CLIENT_PARAMS=[params to client] \
    SERVER=[server directory name] \
    SERVER_PARAMS=[params to server] \
    SCENARIO=[scenario] \
    docker-compose up
-```
+   ```
 
-SERVER_PARAMS and CLIENT_PARAMS may be omitted if the corresponding QUIC
-implementations do not require them.
+   SERVER_PARAMS and CLIENT_PARAMS may be omitted if the corresponding QUIC
+   implementations do not require them.
 
-For instance, the following command runs a simple point-to-point scenario and
-specifies a command line parameter for only the client implementation:
+   For instance, the following command runs a simple point-to-point scenario and
+   specifies a command line parameter for only the client implementation:
 
-```
+   ```
    CLIENT="my_quic_impl" \
    CLIENT_PARAMS="-p /10000.txt" \
    SERVER="another_quic_impl" \
    SCENARIO="simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25" \
    docker-compose up
-```
+   ```
 
-A mounted directory, `qnslogs`, is provided for recording logs from the
-endpoints. This directory is created by docker-compose in the directory from
-which it is run. Inside the docker container, the directory is available as
-`/qnslogs`.
+   A mounted directory, `qnslogs`, is provided for recording logs from the
+   endpoints. This directory is created by docker-compose in the directory from
+   which it is run. Inside the docker container, the directory is available as
+   `/qnslogs`.
 
 
 ## Debugging and FAQs
