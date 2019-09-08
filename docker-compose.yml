@@ -12,6 +12,8 @@ services:
       - SCENARIO=$SCENARIO
     cap_add: 
       - NET_ADMIN
+    expose:
+      - "57832"
     networks:
       leftnet:
         ipv4_address: 192.168.0.2

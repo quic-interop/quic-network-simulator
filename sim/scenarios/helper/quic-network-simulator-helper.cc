@@ -1,3 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h> 
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 #include "ns3/core-module.h"
 #include "ns3/fd-net-device-module.h"
 #include "ns3/internet-module.h"
@@ -45,9 +53,27 @@ void QuicNetworkSimulatorHelper::Run(Time duration) {
 
   NS_LOG_INFO("Run Emulation.");
   Simulator::Stop(duration);
+  RunSynchronizer();
   Simulator::Run();
   Simulator::Destroy();
   NS_LOG_INFO("Done.");
+}
+
+void QuicNetworkSimulatorHelper::RunSynchronizer() const {
+  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if(sockfd < 0) NS_LOG_ERROR("ERROR opening socket");
+
+  struct sockaddr_in addr;
+  bzero((char *) &addr, sizeof(addr));
+
+  addr.sin_family = AF_INET;  
+  addr.sin_addr.s_addr = INADDR_ANY;  
+  addr.sin_port = htons(57832);
+
+  if(bind(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) NS_LOG_ERROR("ERROR on binding");
+  // We never intend to accept any of the connections.
+  // Use a large backlog queue instead.
+  listen(sockfd, 100);
 }
 
 Ptr<Node> QuicNetworkSimulatorHelper::GetLeftNode() const {
