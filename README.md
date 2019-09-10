@@ -101,8 +101,8 @@ setup](https://github.com/h2o/h2o-qns).
    docker-compose build
    ```
 
-   Note that you will need to run this build command any time you change either
-   implementation, either `Dockerfile`, or either `run_endpoint.sh` file.
+   Note that you will need to run this build command any time you change the
+   client or server implementation, `Dockerfile`, or `run_endpoint.sh` file.
 
    For instance:
 
