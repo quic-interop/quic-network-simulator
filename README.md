@@ -63,9 +63,7 @@ Follow these steps to set up your own QUIC implementation:
 
 1. Now, copy the script below into `run_endpoint.sh`, and add commands as
    instructed. Logs should be recorded in `/qnslogs` for them to be available
-   after simulation completion (more on this later). Note that we insert a 10
-   second sleep at the client because we currently have no synchronization, but
-   we need the server and simulator to be running before the client.
+   after simulation completion (more on this later).
 
     ```bash
     #!/bin/bash
@@ -79,7 +77,8 @@ Follow these steps to set up your own QUIC implementation:
     # - CLIENT_PARAMS contains user-supplied command line parameters
 
     if [ "$ROLE" == "client" ]; then
-        sleep 10     
+        # Wait for the simulator to start up.
+        /wait-for-it.sh sim:57832 -s -t 30
         [ INSERT COMMAND TO RUN YOUR QUIC CLIENT ]
     elif [ "$ROLE" == "server" ]; then
         [ INSERT COMMAND TO RUN YOUR QUIC SERVER ]

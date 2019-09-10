@@ -13,6 +13,7 @@ public:
   Ptr<Node> GetRightNode() const;
 
 private:
+  void RunSynchronizer() const;
   Ptr<Node> left_node_, right_node_;
 };
 
