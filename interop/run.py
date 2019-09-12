@@ -1,10 +1,12 @@
+from enum import Enum
 import filecmp
 import os
-import subprocess
-import shutil
 from prettytable import PrettyTable
+import random
+import shutil
+import subprocess
+import string
 from termcolor import colored
-from enum import Enum
 
 class TestResult(Enum):
   SUCCEEDED = 1
@@ -20,6 +22,11 @@ TESTCASES = { # name => letter in the interop matrix
   "retry": "S",
   "resumption": "R",
 }
+
+def random_string(length):
+    """Generate a random string of fixed length """
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(length))
 
 def check_transfer(files):
   for file in files:
@@ -81,6 +88,29 @@ for server in IMPLEMENTATIONS:
     )
     os.system(cmd)
     
+    # check that the client is capable of returning UNSUPPORTED
+    cmd = (
+        "TESTCASE=" + random_string(6) + " "
+        "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
+        "CLIENT=" + IMPLEMENTATIONS[client] + " "
+        "docker-compose -f ../docker-compose.yml -f interop.yml up --timeout 0 --abort-on-container-exit sim client"
+      )
+    output = subprocess.run(cmd, shell=True, capture_output=True)
+    status = get_test_result(output.stdout)
+    if status != TestResult.UNSUPPORTED:
+      continue
+
+    # check that the server is capable of returning UNSUPPORTED
+    cmd = (
+        "TESTCASE=" + random_string(6) + " "
+        "SERVER=" + IMPLEMENTATIONS[server] + " "
+        "docker-compose -f ../docker-compose.yml -f interop.yml up server"
+      )
+    output = subprocess.run(cmd, shell=True, capture_output=True)
+    status = get_test_result(output.stdout)
+    if status != TestResult.UNSUPPORTED:
+      continue
+
     # run the test cases
     for testcase in TESTCASES:
       print("Server: " + server + ". Client: " + client + ". Test case: " + testcase)
@@ -92,7 +122,6 @@ for server in IMPLEMENTATIONS:
         "CLIENT_PARAMS=\"https://server:443/file1.html https://server:443/file2.html\" "
         "docker-compose -f ../docker-compose.yml -f interop.yml up --abort-on-container-exit --timeout 1"
       )
-      print(cmd)
       output = subprocess.run(cmd, shell=True, capture_output=True)
       status = get_test_result(output.stdout)
 
