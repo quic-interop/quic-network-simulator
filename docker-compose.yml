@@ -56,7 +56,6 @@ services:
       - CLIENT_PARAMS=$CLIENT_PARAMS
     depends_on:
       - sim
-      - server
     cap_add: 
       - NET_ADMIN
     networks:
