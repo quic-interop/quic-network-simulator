@@ -3,11 +3,11 @@ version: "3.7"
 services:
   server:
     volumes:
-      - ./interop/www:/www
+      - $WWW:/www
     environment:
       - TESTCASE=$TESTCASE
   client:
     volumes:
-      - ./interop/downloads:/downloads
+      - $DOWNLOADS:/downloads
     environment:
       - TESTCASE=$TESTCASE

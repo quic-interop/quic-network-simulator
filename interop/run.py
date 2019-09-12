@@ -75,6 +75,7 @@ for server in IMPLEMENTATIONS:
     # check that the client is capable of returning UNSUPPORTED
     cmd = (
         "TESTCASE=" + random_string(6) + " "
+        "WWW=/dev/null DOWNLOADS=/dev/null "
         "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
         "CLIENT=" + IMPLEMENTATIONS[client] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up --timeout 0 --abort-on-container-exit sim client"
@@ -86,6 +87,7 @@ for server in IMPLEMENTATIONS:
     # check that the server is capable of returning UNSUPPORTED
     cmd = (
         "TESTCASE=" + random_string(6) + " "
+        "WWW=/dev/null DOWNLOADS=/dev/null "
         "SERVER=" + IMPLEMENTATIONS[server] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up server"
       )
@@ -98,6 +100,8 @@ for server in IMPLEMENTATIONS:
       client_params = " ".join([ "https://server:443/" + p for p in testcase.get_paths()])
       cmd = (
         "TESTCASE=" + str(testcase) + " "
+        "WWW=" + testcase.www_dir() + " "
+        "DOWNLOADS=" + testcase.download_dir() + " "
         "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
         "CLIENT=" + IMPLEMENTATIONS[client] + " "
         "SERVER=" + IMPLEMENTATIONS[server] + " "
