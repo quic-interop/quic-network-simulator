@@ -3,6 +3,7 @@ import os
 import subprocess
 import shutil
 from prettytable import PrettyTable
+from termcolor import colored
 from enum import Enum
 
 class TestResult(Enum):
@@ -17,6 +18,7 @@ IMPLEMENTATIONS = { # name => docker image
 TESTCASES = { # name => letter in the interop matrix
   "transfer": "HDC", 
   "retry": "S",
+  "resumption": "R",
 }
 
 def check_transfer(files):
@@ -41,15 +43,20 @@ def get_test_result(output):
   return TestResult.FAILED
 
 def print_results(results):
+  def get_letters(testcases):
+    if len(testcases) == 0:
+      return "-"
+    return "".join([ TESTCASES[n] for n in testcases ])
+    
   t = PrettyTable()
   t.field_names = [ "" ] + [ name for name in IMPLEMENTATIONS ]
   for server in IMPLEMENTATIONS:
     row = [ server ]
     for client in IMPLEMENTATIONS:
-      res = ""
-      for testcase in TESTCASES:
-        if results[server][client][testcase] == TestResult.SUCCEEDED:
-          res += TESTCASES[testcase]
+      cell = results[server][client]
+      res = colored(get_letters(cell[TestResult.SUCCEEDED]), "green") + "\n"
+      res += colored(get_letters(cell[TestResult.UNSUPPORTED]), "yellow") + "\n"
+      res += colored(get_letters(cell[TestResult.FAILED]), "red")
       row += [ res ]
     t.add_row(row)
   print(t)
@@ -58,7 +65,11 @@ results = {}
 for server in IMPLEMENTATIONS:
   results[server] = {}
   for client in IMPLEMENTATIONS:
-    results[server][client] = {}
+    results[server][client] = {
+      TestResult.SUCCEEDED: [],
+      TestResult.FAILED: [],
+      TestResult.UNSUPPORTED: [],
+    }
 
 for server in IMPLEMENTATIONS:
   for client in IMPLEMENTATIONS:
@@ -86,7 +97,7 @@ for server in IMPLEMENTATIONS:
       status = get_test_result(output.stdout)
 
       print("Test result:", status)
-      results[server][client][testcase] = status
+      results[server][client][status] += [ testcase ]
 
       check_transfer(['file1.html', 'file2.html'])
       clear_directory("downloads/")
