@@ -1,0 +1,13 @@
+version: "3.7"
+
+services:
+  server:
+    volumes:
+      - ./interop/www:/www
+    environment:
+      - TESTCASE=$TESTCASE
+  client:
+    volumes:
+      - ./interop/downloads:/downloads
+    environment:
+      - TESTCASE=$TESTCASE
