@@ -1,12 +1,14 @@
 from enum import Enum
-import filecmp
 import os
 from prettytable import PrettyTable
 import random
 import shutil
 import subprocess
 import string
+from typing import List
 from termcolor import colored
+
+import testcases
 
 class TestResult(Enum):
   SUCCEEDED = 1
@@ -17,43 +19,25 @@ class TestResult(Enum):
 IMPLEMENTATIONS = { # name => docker image
   "quicgo": "quicgo"
 }
-TESTCASES = { # name => letter in the interop matrix
-  "transfer": "HDC", 
-  "retry": "S",
-  "resumption": "R",
-}
+TESTCASES = [ 
+  testcases.TestCaseTransfer(),
+  testcases.TestCaseRetry(),
+  testcases.TestCaseResumption(),
+]
 
-def random_string(length):
-    """Generate a random string of fixed length """
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(length))
+def random_string(length: int):
+  """Generate a random string of fixed length """
+  letters = string.ascii_lowercase
+  return ''.join(random.choice(letters) for i in range(length))
 
-def check_transfer(files):
-  for file in files:
-    if not os.path.isfile("downloads/" + file) or not filecmp.cmp("www/" + file, "downloads/" + file, shallow=False):
-      return False
-  return True
-
-def clear_directory(path):
-  for file in os.listdir(path):
-    file_path = os.path.join(path, file)
-    if os.path.isfile(file_path):
-        os.unlink(file_path)
-    elif os.path.isdir(file_path): shutil.rmtree(file_path)
-
-def get_test_result(output):
-  lines = output.splitlines()
-  if any("exit status 127" in str(l) for l in lines):
-    return TestResult.UNSUPPORTED
-  if any("client exited with code 0" in str(l) for l in lines):
-    return TestResult.SUCCEEDED
-  return TestResult.FAILED
+def is_unsupported(lines: List[str]):
+  return any("exit status 127" in str(l) for l in lines)
 
 def print_results(results):
   def get_letters(testcases):
     if len(testcases) == 0:
       return "-"
-    return "".join([ TESTCASES[n] for n in testcases ])
+    return "".join([ test.abbreviation() for test in testcases ])
     
   t = PrettyTable()
   t.field_names = [ "" ] + [ name for name in IMPLEMENTATIONS ]
@@ -96,8 +80,7 @@ for server in IMPLEMENTATIONS:
         "docker-compose -f ../docker-compose.yml -f interop.yml up --timeout 0 --abort-on-container-exit sim client"
       )
     output = subprocess.run(cmd, shell=True, capture_output=True)
-    status = get_test_result(output.stdout)
-    if status != TestResult.UNSUPPORTED:
+    if not is_unsupported(output.stdout.splitlines()):
       continue
 
     # check that the server is capable of returning UNSUPPORTED
@@ -107,29 +90,32 @@ for server in IMPLEMENTATIONS:
         "docker-compose -f ../docker-compose.yml -f interop.yml up server"
       )
     output = subprocess.run(cmd, shell=True, capture_output=True)
-    status = get_test_result(output.stdout)
-    if status != TestResult.UNSUPPORTED:
+    if not is_unsupported(output.stdout.splitlines()):
       continue
 
     # run the test cases
     for testcase in TESTCASES:
-      print("Server: " + server + ". Client: " + client + ". Test case: " + testcase)
+      client_params = " ".join([ "https://server:443/" + p for p in testcase.get_paths()])
       cmd = (
-        "TESTCASE=" + testcase + " "
+        "TESTCASE=" + str(testcase) + " "
         "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
         "CLIENT=" + IMPLEMENTATIONS[client] + " "
         "SERVER=" + IMPLEMENTATIONS[server] + " "
-        "CLIENT_PARAMS=\"https://server:443/file1.html https://server:443/file2.html\" "
+        "CLIENT_PARAMS=\"" + client_params + "\" "
         "docker-compose -f ../docker-compose.yml -f interop.yml up --abort-on-container-exit --timeout 1"
       )
       output = subprocess.run(cmd, shell=True, capture_output=True)
-      status = get_test_result(output.stdout)
 
-      print("Test result:", status)
+      lines = output.stdout.splitlines()
+      status = TestResult.FAILED
+      if is_unsupported(lines):
+        status = TestResult.UNSUPPORTED
+      elif any("client exited with code 0" in str(l) for l in lines):
+        if testcase.check():
+          status = TestResult.SUCCEEDED
+      testcase.cleanup()
+
       results[server][client][status] += [ testcase ]
-
-      check_transfer(['file1.html', 'file2.html'])
-      clear_directory("downloads/")
 
 print("Results: ")
 print_results(results)
