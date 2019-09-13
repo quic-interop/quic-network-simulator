@@ -28,7 +28,7 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./qnslogs:/qnslogs
+      - ./logs/server:/logs
     environment:
       - ROLE=server
       - SERVER_PARAMS=$SERVER_PARAMS
@@ -48,7 +48,7 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./qnslogs:/qnslogs
+      - ./logs/client:/logs
     environment:
       - ROLE=client
       - CLIENT_PARAMS=$CLIENT_PARAMS
