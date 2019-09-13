@@ -62,16 +62,17 @@ for server in IMPLEMENTATIONS:
       TestResult.UNSUPPORTED: [],
     }
 
+# (re-) build the docker images
+os.system("docker-compose -f ../docker-compose.yml -f interop.yml build sim" )
+for impl in IMPLEMENTATIONS:
+  cmd = (
+    "SERVER=" + IMPLEMENTATIONS[impl] + " " 
+    "docker-compose -f ../docker-compose.yml -f interop.yml build server"
+  )
+  os.system(cmd)
+
 for server in IMPLEMENTATIONS:
   for client in IMPLEMENTATIONS:
-    # (re-) build the docker images
-    cmd = (
-      "SERVER=" + IMPLEMENTATIONS[server] + " " 
-      "CLIENT=" + IMPLEMENTATIONS[server] + " "
-      "docker-compose -f ../docker-compose.yml -f interop.yml build"
-    )
-    os.system(cmd)
-    
     # check that the client is capable of returning UNSUPPORTED
     cmd = (
         "TESTCASE=" + random_string(6) + " "
