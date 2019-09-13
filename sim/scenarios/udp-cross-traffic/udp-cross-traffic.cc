@@ -45,7 +45,5 @@ int main(int argc, char *argv[]) {
   onoff.SetConstantRate(DataRate(cross_data_rate));
   onoff.Install(sim.GetRightNode()).Start(Seconds(20));
 
-  p2p.EnablePcapAll("trace");
-
   sim.Run(Seconds(36000));
 }
