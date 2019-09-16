@@ -142,10 +142,10 @@ setup](https://github.com/h2o/h2o-qns).
    docker-compose up
    ```
 
-   A mounted directory, `qnslogs`, is provided for recording logs from the
-   endpoints. This directory is created by docker-compose in the directory from
-   which it is run. Inside the docker container, the directory is available as
-   `/qnslogs`.
+   A mounted directory is provided for recording logs from the endpoints.
+   docker-compose creates a `logs/server` and `logs/client` directory from
+   the directory from which it is run. Inside the docker container, the
+   directory is available as `/logs`.
 
 
 ## Debugging and FAQs
