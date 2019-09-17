@@ -8,6 +8,8 @@ services:
     hostname: sim
     stdin_open: true
     tty: true
+    volumes:
+      - ./logs/sim:/logs
     environment:
       - SCENARIO=$SCENARIO
     cap_add: 

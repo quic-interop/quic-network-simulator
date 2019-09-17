@@ -91,7 +91,6 @@ int main(int argc, char *argv[]) {
   apps.Start(Seconds(0));
 
   p2p_source.EnablePcapAll("trace-source");
-  p2p.EnablePcapAll("trace");
   p2p_sink.EnablePcapAll("trace-sink");
 
   Simulator::Schedule(print_interval, &printBW, apps.Get(0)->GetObject<PacketSink>());
