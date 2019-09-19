@@ -102,6 +102,7 @@ class InteropRunner:
     print(t)
 
   def _run_testcase(self, server: str, client: str, testcase: testcases.TestCase) -> TestResult:
+    print("Server: " + server + ". Client: " + client + ". Running test case: " + str(testcase))
     client_params = " ".join([ "https://server:443/" + p for p in testcase.get_paths()])
     cmd = (
       "TESTCASE=" + str(testcase) + " "
@@ -129,7 +130,7 @@ class InteropRunner:
     """run the interop test suite and output the table"""
     for server in IMPLEMENTATIONS:
       for client in IMPLEMENTATIONS:
-        if not (self._check_impl_is_compliant(server) and self._check_impl_is_compliant(client)):
+        if not (self._check_impl_is_compliant(IMPLEMENTATIONS[server]) and self._check_impl_is_compliant(IMPLEMENTATIONS[client])):
           continue
 
         # run the test cases
