@@ -17,7 +17,7 @@ class TestResult(Enum):
 
 # add your QUIC implementation here
 IMPLEMENTATIONS = { # name => docker image
-  "quicgo": "quicgo"
+  "quicgo": "martenseemann/quic-go-interop:latest"
 }
 TESTCASES = [ 
   testcases.TestCaseTransfer(),
@@ -44,14 +44,6 @@ class InteropRunner:
           TestResult.FAILED: [],
           TestResult.UNSUPPORTED: [],
         }
-
-    # (re-) build the docker images
-    os.system("docker-compose -f ../docker-compose.yml -f interop.yml build sim" )
-    for impl in IMPLEMENTATIONS:
-      os.system(
-        "SERVER=" + IMPLEMENTATIONS[impl] + " " 
-        "docker-compose -f ../docker-compose.yml -f interop.yml build server"
-      )
 
   def _is_unsupported(self, lines: List[str]) -> bool:
     return any("exit status 127" in str(l) for l in lines)
