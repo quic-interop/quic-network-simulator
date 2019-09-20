@@ -1,6 +1,6 @@
 # Droplist
 
-This scenario uses a bottleneck link similar to the [../simple-p2p](simple-p2p)
+This scenario uses a bottleneck link similar to the [simple-p2p](../simple-p2p)
 scenario and optionally allows configuring the link to drop specific packets in
 either direction.
 
