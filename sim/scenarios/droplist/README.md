@@ -28,11 +28,11 @@ This scenario has the following configurable properties:
  packets arriving at the link, and may not be the same as the QUIC packet
  number, especially if an endpoint coalesces packets or if an endpoint resets
  packet numbers across epochs. This is an optional parameter. For example,
- `--drops-to-client=1,3,15`. (Note that there are no spaces in the list.)`
+ `--drops_to_client=1,3,15`. (Note that there are no spaces in the list.)`
 
-* `--drops-to-server`: Same as `drops-to-client` but in the other direction.
+* `--drops_to_server`: Same as `drops_to_client` but in the other direction.
 
 For example,
 ```bash
-./run.sh "droplist --delay=15ms --bandwidth=10Mbps --queue=25 --drops-to-client=1,3,4 --drops-to-server=5"
+./run.sh "droplist --delay=15ms --bandwidth=10Mbps --queue=25 --drops_to_client=1,3,4 --drops_to_server=5"
 ```
