@@ -1,10 +1,5 @@
-import abc
+import abc, filecmp, os, string, tempfile, random, logging, sys
 from Crypto.Cipher import AES
-import filecmp
-import os
-import string
-import tempfile
-import random
 
 MB = 1<<20
 
@@ -43,6 +38,7 @@ class TestCase(abc.ABC):
     f = open(self.www_dir() + filename, "wb")
     f.write(enc.encrypt(b' ' * size))
     f.close()
+    logging.debug("Generated random file: %s of size: %d", filename, size)
     return filename
 
   def _check_files(self):
@@ -117,4 +113,3 @@ class TestCaseResumption(TestCase):
 
   def check(self):
     return self._check_files()
-      

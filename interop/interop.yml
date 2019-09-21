@@ -13,3 +13,4 @@ services:
       - $DOWNLOADS:/downloads
     environment:
       - TESTCASE=$TESTCASE
+      - REQUESTS=$REQUESTS

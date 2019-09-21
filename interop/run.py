@@ -1,35 +1,45 @@
-from enum import Enum
-import os
-from prettytable import PrettyTable
-import random
-import shutil
-import subprocess
-import string
+import os, random, shutil, subprocess, string, logging, sys, argparse
 from typing import List
 from termcolor import colored
+from enum import Enum
+from prettytable import PrettyTable
 
 import testcases
-
-class TestResult(Enum):
-  SUCCEEDED = 1
-  FAILED = 2
-  UNSUPPORTED = 3
 
 # add your QUIC implementation here
 IMPLEMENTATIONS = { # name => docker image
   "quicgo": "martenseemann/quic-go-interop:latest"
+  "quicly": "janaiyengar/quicly:interop"
 }
+
 TESTCASES = [ 
   testcases.TestCaseTransfer(),
   testcases.TestCaseRetry(),
   testcases.TestCaseResumption(),
 ]
 
+def get_args():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-l', '--loglevel', default='WARNING',
+                      help='Specify log level in one of DEBUG, INFO, WARNING, ERROR, CRITICAL')
+  return parser.parse_args()
+
+def set_log_level(loglevel):
+  numeric_level = getattr(logging, loglevel.upper(), None)
+  if not isinstance(numeric_level, int):
+    print('Invalid log level:', loglevel)
+    sys.exit(1)
+  logging.basicConfig(stream=sys.stderr, level=numeric_level)
+
 def random_string(length: int):
   """ Generate a random string of fixed length """
   letters = string.ascii_lowercase
   return ''.join(random.choice(letters) for i in range(length))
 
+class TestResult(Enum):
+  SUCCEEDED = 1
+  FAILED = 2
+  UNSUPPORTED = 3
 
 class InteropRunner:
   results = {}
@@ -46,7 +56,7 @@ class InteropRunner:
         }
 
   def _is_unsupported(self, lines: List[str]) -> bool:
-    return any("exit status 127" in str(l) for l in lines)
+    return any("exited with code 127" in str(l) for l in lines)
 
   def _check_impl_is_compliant(self, name: str) -> bool:
     """ check if an implementation return UNSUPPORTED for unknown test cases """
@@ -54,6 +64,7 @@ class InteropRunner:
       return self.compliant[name]
 
     # check that the client is capable of returning UNSUPPORTED
+    logging.info("Checking compliance of %s client", name)
     cmd = (
         "TESTCASE=" + random_string(6) + " "
         "WWW=/dev/null DOWNLOADS=/dev/null "
@@ -63,10 +74,14 @@ class InteropRunner:
       )
     output = subprocess.run(cmd, shell=True, capture_output=True)
     if not self._is_unsupported(output.stdout.splitlines()):
+      logging.error("%s client not compliant.", name)
+      logging.debug("%s", output.stdout.decode('utf-8'))
       self.compliant[name] = False
       return False
+    logging.info("%s client compliant.", name)
 
     # check that the server is capable of returning UNSUPPORTED
+    logging.info("Checking compliance of %s server", name)
     cmd = (
         "TESTCASE=" + random_string(6) + " "
         "WWW=/dev/null DOWNLOADS=/dev/null "
@@ -75,11 +90,16 @@ class InteropRunner:
       )
     output = subprocess.run(cmd, shell=True, capture_output=True)
     if not self._is_unsupported(output.stdout.splitlines()):
+      logging.error("%s server not compliant.", name)
+      logging.debug("%s", output.stdout.decode('utf-8'))
       self.compliant[name] = False
       return False
+    logging.info("%s server compliant.", name)
     
+    # remember compliance test outcome
     self.compliant[name] = True
     return True
+
 
   def _print_results(self):
     """print the interop table"""
@@ -103,7 +123,8 @@ class InteropRunner:
 
   def _run_testcase(self, server: str, client: str, testcase: testcases.TestCase) -> TestResult:
     print("Server: " + server + ". Client: " + client + ". Running test case: " + str(testcase))
-    client_params = " ".join([ "https://server:443/" + p for p in testcase.get_paths()])
+    reqs = " ".join(["https://server:443/" + p for p in testcase.get_paths()])
+    logging.debug("Requests: %s", reqs)
     cmd = (
       "TESTCASE=" + str(testcase) + " "
       "WWW=" + testcase.www_dir() + " "
@@ -111,12 +132,14 @@ class InteropRunner:
       "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
       "CLIENT=" + IMPLEMENTATIONS[client] + " "
       "SERVER=" + IMPLEMENTATIONS[server] + " "
-      "CLIENT_PARAMS=\"" + client_params + "\" "
+      "REQUESTS=\"" + reqs + "\" "
       "docker-compose -f ../docker-compose.yml -f interop.yml up --abort-on-container-exit --timeout 1"
     )
     output = subprocess.run(cmd, shell=True, capture_output=True)
+    logging.debug("%s", output.stdout.decode('utf-8'))
 
     lines = output.stdout.splitlines()
+
     status = TestResult.FAILED
     if self._is_unsupported(lines):
       status = TestResult.UNSUPPORTED
@@ -130,7 +153,9 @@ class InteropRunner:
     """run the interop test suite and output the table"""
     for server in IMPLEMENTATIONS:
       for client in IMPLEMENTATIONS:
+        print("Running with server:", IMPLEMENTATIONS[server], "and client:", IMPLEMENTATIONS[client])
         if not (self._check_impl_is_compliant(IMPLEMENTATIONS[server]) and self._check_impl_is_compliant(IMPLEMENTATIONS[client])):
+          print("Not compliant, skipping")
           continue
 
         # run the test cases
@@ -140,4 +165,6 @@ class InteropRunner:
 
     self._print_results()
 
+args = get_args()
+set_log_level(args.loglevel)
 InteropRunner().run()
