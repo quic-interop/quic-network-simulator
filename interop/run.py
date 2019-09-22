@@ -5,18 +5,8 @@ from enum import Enum
 from prettytable import PrettyTable
 
 import testcases
-
-# add your QUIC implementation here
-IMPLEMENTATIONS = { # name => docker image
-  "quicgo": "martenseemann/quic-go-interop:latest",
-  "quicly": "janaiyengar/quicly:interop"
-}
-
-TESTCASES = [ 
-  testcases.TestCaseTransfer(),
-  testcases.TestCaseRetry(),
-  testcases.TestCaseResumption(),
-]
+from run_these_tests import TESTCASES
+from implementations import IMPLEMENTATIONS
 
 def get_args():
   parser = argparse.ArgumentParser()
