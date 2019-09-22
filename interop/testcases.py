@@ -12,8 +12,8 @@ class TestCase(abc.ABC):
   _name = ""
   _abbreviation = ""
   _files = []
-  _www_dir = ""
-  _download_dir = ""
+  _www_dir = None
+  _download_dir = None
 
   def __str__(self):
     return self._name
@@ -22,12 +22,12 @@ class TestCase(abc.ABC):
     return self._abbreviation
 
   def www_dir(self):
-    if self._www_dir == "":
+    if not self._www_dir:
       self._www_dir = tempfile.TemporaryDirectory(dir = "/tmp", prefix = "www_")
     return self._www_dir.name + "/"
   
   def download_dir(self):
-    if self._download_dir == "":
+    if not self._download_dir:
       self._download_dir = tempfile.TemporaryDirectory(dir = "/tmp", prefix = "download_")
     return self._download_dir.name + "/"
 
@@ -60,12 +60,12 @@ class TestCase(abc.ABC):
     return True
 
   def cleanup(self):
-    if self._www_dir != "":
+    if self._www_dir:
       self._www_dir.cleanup()
-      self._www_dir = ""
-    if self._download_dir != "":
+      self._www_dir = None
+    if self._download_dir:
       self._download_dir.cleanup()
-      self._download_dir = ""
+      self._download_dir = None
 
   @abc.abstractmethod
   def get_paths(self):
