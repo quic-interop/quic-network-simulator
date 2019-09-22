@@ -57,8 +57,10 @@ class TestCase(abc.ABC):
   def cleanup(self):
     if self._www_dir != "":
       self._www_dir.cleanup()
+      self._www_dir = ""
     if self._download_dir != "":
       self._download_dir.cleanup()
+      self._download_dir = ""
 
   @abc.abstractmethod
   def get_paths(self):
