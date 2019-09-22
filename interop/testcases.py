@@ -46,12 +46,17 @@ class TestCase(abc.ABC):
       raise Exception("No test files generated.")
     num_files = len([ n for n in os.listdir(self.download_dir()) if os.path.isfile(os.path.join(self.download_dir(), n)) ])
     if num_files != len(self._files):
+      logging.info("Downloaded the wrong number of files. Got %d, expected %d.", num_files, len(self._files))
       return False
     for f in self._files:
-      if not os.path.isfile(self.download_dir() + f):
+      fp = self.download_dir() + f
+      if not os.path.isfile(fp):
+        logging.info("File %s does not exist.", fp)
         return False
-      if not filecmp.cmp(self.www_dir() + f, self.download_dir() + f, shallow=False):
+      if not filecmp.cmp(self.www_dir() + f, fp, shallow=False):
+        logging.info("File contents of %s do not match.", fp)
         return False
+    logging.debug("Check of downloaded files succeeded.")
     return True
 
   def cleanup(self):
