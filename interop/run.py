@@ -8,7 +8,7 @@ import testcases
 
 # add your QUIC implementation here
 IMPLEMENTATIONS = { # name => docker image
-  "quicgo": "martenseemann/quic-go-interop:latest"
+#  "quicgo": "martenseemann/quic-go-interop:latest",
   "quicly": "janaiyengar/quicly:interop"
 }
 
@@ -56,11 +56,12 @@ class InteropRunner:
         }
 
   def _is_unsupported(self, lines: List[str]) -> bool:
-    return any("exited with code 127" in str(l) for l in lines)
+    return any("exited with code 127" in str(l) for l in lines) or any("exit status 127" in str(l) for l in lines)
 
   def _check_impl_is_compliant(self, name: str) -> bool:
     """ check if an implementation return UNSUPPORTED for unknown test cases """
     if name in self.compliant:
+      logging.debug("%s already tested for compliance: %s", name, str(self.compliant))
       return self.compliant[name]
 
     # check that the client is capable of returning UNSUPPORTED
@@ -69,7 +70,7 @@ class InteropRunner:
         "TESTCASE=" + random_string(6) + " "
         "WWW=/dev/null DOWNLOADS=/dev/null "
         "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
-        "CLIENT=" + name + " "
+        "CLIENT=" + IMPLEMENTATIONS[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up --timeout 0 --abort-on-container-exit sim client"
       )
     output = subprocess.run(cmd, shell=True, capture_output=True)
@@ -85,7 +86,7 @@ class InteropRunner:
     cmd = (
         "TESTCASE=" + random_string(6) + " "
         "WWW=/dev/null DOWNLOADS=/dev/null "
-        "SERVER=" + name + " "
+        "SERVER=" + IMPLEMENTATIONS[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up server"
       )
     output = subprocess.run(cmd, shell=True, capture_output=True)
@@ -153,8 +154,8 @@ class InteropRunner:
     """run the interop test suite and output the table"""
     for server in IMPLEMENTATIONS:
       for client in IMPLEMENTATIONS:
-        print("Running with server:", IMPLEMENTATIONS[server], "and client:", IMPLEMENTATIONS[client])
-        if not (self._check_impl_is_compliant(IMPLEMENTATIONS[server]) and self._check_impl_is_compliant(IMPLEMENTATIONS[client])):
+        print("Running with server:", server, "and client:", client)
+        if not (self._check_impl_is_compliant(server) and self._check_impl_is_compliant(client)):
           print("Not compliant, skipping")
           continue
 
