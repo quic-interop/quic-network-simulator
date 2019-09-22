@@ -20,16 +20,10 @@ TESTCASES = [
 
 def get_args():
   parser = argparse.ArgumentParser()
-  parser.add_argument('-l', '--loglevel', default='WARNING',
-                      help='Specify log level in one of DEBUG, INFO, WARNING, ERROR, CRITICAL')
+  parser.add_argument('-d', '--debug', action='store_const',
+                      const=True, default=False,
+                      help='turn on debug logs')
   return parser.parse_args()
-
-def set_log_level(loglevel):
-  numeric_level = getattr(logging, loglevel.upper(), None)
-  if not isinstance(numeric_level, int):
-    print('Invalid log level:', loglevel)
-    sys.exit(1)
-  logging.basicConfig(stream=sys.stderr, level=numeric_level)
 
 def random_string(length: int):
   """ Generate a random string of fixed length """
@@ -166,6 +160,10 @@ class InteropRunner:
 
     self._print_results()
 
-args = get_args()
-set_log_level(args.loglevel)
+
+if get_args().debug:
+  logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+else:
+  logging.basicConfig(stream=sys.stderr, level=logging.WARNING)
+
 InteropRunner().run()
