@@ -1,6 +1,7 @@
 import abc, filecmp, os, string, tempfile, random, logging, sys
 from Crypto.Cipher import AES
 
+KB = 1<<10
 MB = 1<<20
 
 def random_string(length: int):
@@ -75,10 +76,22 @@ class TestCase(abc.ABC):
   def check(self):
     pass
 
+class TestCaseHandshake(TestCase):
+  def __init__(self):
+    self._name = "handshake"
+    self._abbreviation = "H"
+
+  def get_paths(self):
+    self._files = [ self._generate_random_file(1*KB) ]
+    return self._files
+
+  def check(self):
+    return self._check_files()
+
 class TestCaseTransfer(TestCase):
   def __init__(self):
     self._name = "transfer"
-    self._abbreviation = "HDC"
+    self._abbreviation = "DC"
 
   def get_paths(self):
     self._files = [ 
@@ -97,10 +110,7 @@ class TestCaseRetry(TestCase):
     self._abbreviation = "S"
 
   def get_paths(self):
-    self._files = [ 
-      self._generate_random_file(3*MB),
-      self._generate_random_file(5*MB),
-    ]
+    self._files = [ self._generate_random_file(10*KB), ]
     return self._files
 
   def check(self):
@@ -113,8 +123,8 @@ class TestCaseResumption(TestCase):
 
   def get_paths(self):
     self._files = [ 
-      self._generate_random_file(1*MB),
-      self._generate_random_file(2*MB),
+      self._generate_random_file(5*KB),
+      self._generate_random_file(10*KB),
     ]
     return self._files
 
