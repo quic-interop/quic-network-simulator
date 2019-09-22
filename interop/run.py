@@ -1,4 +1,4 @@
-import os, random, shutil, subprocess, string, logging, sys, argparse
+import os, random, shutil, subprocess, string, logging, sys, tempfile, argparse
 from typing import List
 from termcolor import colored
 from enum import Enum
@@ -48,10 +48,16 @@ class InteropRunner:
       logging.debug("%s already tested for compliance: %s", name, str(self.compliant))
       return self.compliant[name]
 
+    sim_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_sim_")
+    client_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_client_")
+
     # check that the client is capable of returning UNSUPPORTED
     logging.info("Checking compliance of %s client", name)
     cmd = (
         "TESTCASE=" + random_string(6) + " "
+        "SERVER_LOGS=/dev/null "
+        "CLIENT_LOGS=" + client_log_dir.name + " " 
+        "SIM_LOGS=" + sim_log_dir.name + " "
         "WWW=/dev/null DOWNLOADS=/dev/null "
         "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
         "CLIENT=" + IMPLEMENTATIONS[name] + " "
@@ -67,8 +73,14 @@ class InteropRunner:
 
     # check that the server is capable of returning UNSUPPORTED
     logging.info("Checking compliance of %s server", name)
+    sim_log_dir.cleanup()
+    sim_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_sim_")
+    server_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_server_")
     cmd = (
         "TESTCASE=" + random_string(6) + " "
+        "SERVER_LOGS=" + server_log_dir.name + " "
+        "CLIENT_LOGS=/dev/null "
+        "SIM_LOGS=" + sim_log_dir.name + " "
         "WWW=/dev/null DOWNLOADS=/dev/null "
         "SERVER=" + IMPLEMENTATIONS[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up server"
@@ -110,12 +122,18 @@ class InteropRunner:
 
   def _run_testcase(self, server: str, client: str, testcase: testcases.TestCase) -> TestResult:
     print("Server: " + server + ". Client: " + client + ". Running test case: " + str(testcase))
+    server_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_server_")
+    client_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_client_")
+    sim_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_sim_")
     reqs = " ".join(["https://server:443/" + p for p in testcase.get_paths()])
     logging.debug("Requests: %s", reqs)
     cmd = (
       "TESTCASE=" + str(testcase) + " "
       "WWW=" + testcase.www_dir() + " "
       "DOWNLOADS=" + testcase.download_dir() + " "
+      "SERVER_LOGS=" + server_log_dir.name + " "
+      "CLIENT_LOGS=" + client_log_dir.name + " "
+      "SIM_LOGS=" + sim_log_dir.name + " "
       "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
       "CLIENT=" + IMPLEMENTATIONS[client] + " "
       "SERVER=" + IMPLEMENTATIONS[server] + " "
@@ -133,11 +151,27 @@ class InteropRunner:
     elif any("client exited with code 0" in str(l) for l in lines):
       if testcase.check():
         status = TestResult.SUCCEEDED
+
+    # save logs
+    if status == TestResult.FAILED or status == TestResult.SUCCEEDED:
+      log_dir = "logs/" + server + "_" + client + "/" + str(testcase)
+      shutil.copytree(server_log_dir.name, log_dir + "/server")
+      shutil.copytree(client_log_dir.name, log_dir + "/client")
+      shutil.copytree(sim_log_dir.name, log_dir + "/sim")
+
     testcase.cleanup()
+    server_log_dir.cleanup()
+    client_log_dir.cleanup()
+    sim_log_dir.cleanup()
     return status
 
   def run(self):
     """run the interop test suite and output the table"""
+
+    # clear the logs directory
+    if os.path.exists("logs/"):
+      shutil.rmtree("logs/")
+    
     for server in IMPLEMENTATIONS:
       for client in IMPLEMENTATIONS:
         print("Running with server:", server, "and client:", client)
