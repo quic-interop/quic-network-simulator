@@ -2,7 +2,7 @@ import os, random, shutil, subprocess, string, logging, sys, argparse
 from typing import List
 from termcolor import colored
 from enum import Enum
-from prettytable import PrettyTable
+import prettytable
 
 import testcases
 from run_these_tests import TESTCASES
@@ -93,7 +93,9 @@ class InteropRunner:
         return "-"
       return "".join([ test.abbreviation() for test in testcases ])
       
-    t = PrettyTable()
+    t = prettytable.PrettyTable()
+    t.hrules = prettytable.ALL
+    t.vrules = prettytable.ALL
     t.field_names = [ "" ] + [ name for name in IMPLEMENTATIONS ]
     for server in IMPLEMENTATIONS:
       row = [ server ]
