@@ -1,4 +1,4 @@
-import os, random, shutil, subprocess, string, logging, sys, tempfile, argparse
+import os, random, shutil, subprocess, string, logging, sys, tempfile, argparse, re
 from typing import List
 from termcolor import colored
 from enum import Enum
@@ -24,6 +24,12 @@ class TestResult(Enum):
   SUCCEEDED = 1
   FAILED = 2
   UNSUPPORTED = 3
+
+class LogFileFormatter(logging.Formatter):
+  def format(self, record):
+    msg = super(MyFormatter, self).format(record)
+    # remove color control characters
+    return re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]').sub('', msg)
 
 class InteropRunner:
   results = {}
@@ -125,6 +131,14 @@ class InteropRunner:
     server_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_server_")
     client_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_client_")
     sim_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_sim_")
+    log_file = tempfile.NamedTemporaryFile(dir="/tmp", prefix="output_log_")
+    log_handler = logging.FileHandler(log_file.name)
+    log_handler.setLevel(logging.DEBUG)
+
+    formatter = LogFileFormatter('%(asctime)s %(message)s')
+    log_handler.setFormatter(formatter)
+    logging.getLogger('').addHandler(log_handler)
+
     reqs = " ".join(["https://server:443/" + p for p in testcase.get_paths()])
     logging.debug("Requests: %s", reqs)
     cmd = (
@@ -153,11 +167,14 @@ class InteropRunner:
         status = TestResult.SUCCEEDED
 
     # save logs
+    logging.getLogger('').removeHandler(log_handler)
+    log_handler.close()
     if status == TestResult.FAILED or status == TestResult.SUCCEEDED:
       log_dir = "logs/" + server + "_" + client + "/" + str(testcase)
       shutil.copytree(server_log_dir.name, log_dir + "/server")
       shutil.copytree(client_log_dir.name, log_dir + "/client")
       shutil.copytree(sim_log_dir.name, log_dir + "/sim")
+      shutil.copyfile(log_file.name, log_dir + "/output.txt")
 
     testcase.cleanup()
     server_log_dir.cleanup()
