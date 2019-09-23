@@ -137,7 +137,7 @@ class InteropRunner:
 
     formatter = LogFileFormatter('%(asctime)s %(message)s')
     log_handler.setFormatter(formatter)
-    logging.getLogger('').addHandler(log_handler)
+    logging.getLogger().addHandler(log_handler)
 
     reqs = " ".join(["https://server:443/" + p for p in testcase.get_paths()])
     logging.debug("Requests: %s", reqs)
@@ -167,7 +167,7 @@ class InteropRunner:
         status = TestResult.SUCCEEDED
 
     # save logs
-    logging.getLogger('').removeHandler(log_handler)
+    logging.getLogger().removeHandler(log_handler)
     log_handler.close()
     if status == TestResult.FAILED or status == TestResult.SUCCEEDED:
       log_dir = "logs/" + server + "_" + client + "/" + str(testcase)
@@ -204,9 +204,13 @@ class InteropRunner:
     self._print_results()
 
 
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+console = logging.StreamHandler(stream=sys.stderr)
 if get_args().debug:
-  logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+  console.setLevel(logging.DEBUG)
 else:
-  logging.basicConfig(stream=sys.stderr, level=logging.WARNING)
+  console.setLevel(logging.WARNING)
+logger.addHandler(console)
 
 InteropRunner().run()
