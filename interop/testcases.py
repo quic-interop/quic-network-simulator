@@ -44,6 +44,17 @@ class TestCase(abc.ABC):
     logging.debug("Generated random file: %s of size: %d", filename, size)
     return filename
 
+  def _retry_sent(self, log_dir: tempfile.TemporaryDirectory) -> bool:
+    tr = TraceAnalyzer(log_dir.name + "/trace_node_left.pcap")
+    cap = tr.get_retry()
+    sent = True
+    try: 
+      cap.next()
+    except StopIteration:
+      sent = False
+    cap.close()
+    return sent
+
   def _check_files(self):
     if len(self._files) == 0:
       raise Exception("No test files generated.")
@@ -88,7 +99,12 @@ class TestCaseHandshake(TestCase):
     return self._files
 
   def check(self, log_dir: tempfile.TemporaryDirectory):
-    return self._check_files()
+    if not self._check_files():
+      return False
+    if self._retry_sent(log_dir):
+      logging.info("Didn't expect a Retry to be sent.")
+      return False
+    return True
 
 class TestCaseTransfer(TestCase):
   def __init__(self):
