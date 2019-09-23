@@ -27,7 +27,7 @@ class TestResult(Enum):
 
 class LogFileFormatter(logging.Formatter):
   def format(self, record):
-    msg = super(MyFormatter, self).format(record)
+    msg = super(LogFileFormatter, self).format(record)
     # remove color control characters
     return re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]').sub('', msg)
 
