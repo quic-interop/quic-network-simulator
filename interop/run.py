@@ -175,7 +175,7 @@ class InteropRunner:
     if self._is_unsupported(lines):
       status = TestResult.UNSUPPORTED
     elif any("client exited with code 0" in str(l) for l in lines):
-      if testcase.check():
+      if testcase.check(sim_log_dir):
         status = TestResult.SUCCEEDED
 
     # save logs

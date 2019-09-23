@@ -10,7 +10,7 @@ The Interop Runner is written in Python 3. You'll need to install a few Python m
 pip3 install termcolor prettytable pyshark
 ```
 
-Furthermore, you need to install Wireshark (version 3.0.5 or newer).
+Furthermore, you need to install development version of Wireshark (version 3.1.0 or newer).
 
 Run the interop tests:
 ```bash

@@ -1,6 +1,8 @@
 import abc, filecmp, os, string, tempfile, random, logging, sys
 from Crypto.Cipher import AES
 
+from trace import TraceAnalyzer, Direction
+
 KB = 1<<10
 MB = 1<<20
 
@@ -73,7 +75,7 @@ class TestCase(abc.ABC):
     pass
 
   @abc.abstractmethod
-  def check(self):
+  def check(self, log_dir: tempfile.TemporaryDirectory) -> bool:
     pass
 
 class TestCaseHandshake(TestCase):
@@ -85,7 +87,7 @@ class TestCaseHandshake(TestCase):
     self._files = [ self._generate_random_file(1*KB) ]
     return self._files
 
-  def check(self):
+  def check(self, log_dir: tempfile.TemporaryDirectory):
     return self._check_files()
 
 class TestCaseTransfer(TestCase):
@@ -101,7 +103,7 @@ class TestCaseTransfer(TestCase):
     ]
     return self._files
 
-  def check(self):
+  def check(self, log_dir: tempfile.TemporaryDirectory):
     return self._check_files()
 
 class TestCaseRetry(TestCase):
@@ -113,8 +115,39 @@ class TestCaseRetry(TestCase):
     self._files = [ self._generate_random_file(10*KB), ]
     return self._files
 
-  def check(self):
-    return self._check_files()
+  def _check_trace(self, log_dir: tempfile.TemporaryDirectory) -> bool:
+    # check that (at least) one Retry packet was actually sent
+    tr = TraceAnalyzer(log_dir.name + "/trace_node_left.pcap")
+    tokens = []
+    cap_retry = tr.get_retry(Direction.FROM_SERVER)
+    for p in cap_retry:
+      tokens += [ p.quic.retry_token.replace(":", "") ]
+    cap_retry.close()
+    if len(tokens) == 0:
+      logging.info("Didn't find any Retry packets.")
+      return False
+    
+    # check that an Initial packet uses a token sent in the Retry packet(s)
+    cap_initial = tr.get_initial(Direction.FROM_CLIENT)
+    found = False
+    for p in cap_initial:
+      if p.quic.long_packet_type != "0" or p.quic.token_length == "0":
+        continue
+      token = p.quic.token.replace(":", "")
+      if token in tokens:
+        logging.info("Check of Retry succeeded. Token used: %s", token)
+        found = True
+        break
+    cap_initial.close()
+    if not found:
+      logging.info("Didn't find any Initial packet using a Retry token.")
+    return found
+
+  def check(self, log_dir: tempfile.TemporaryDirectory) -> bool:
+    if not self._check_files():
+      return False
+    return self._check_trace(log_dir)
+    
 
 class TestCaseResumption(TestCase):
   def __init__(self):
@@ -128,7 +161,7 @@ class TestCaseResumption(TestCase):
     ]
     return self._files
 
-  def check(self):
+  def check(self, log_dir: tempfile.TemporaryDirectory):
     return self._check_files()
 
 class TestCaseHTTP3(TestCase):
