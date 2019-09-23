@@ -13,6 +13,8 @@ def get_args():
   parser.add_argument('-d', '--debug', action='store_const',
                       const=True, default=False,
                       help='turn on debug logs')
+  parser.add_argument("-s", "--server", help="server implementations (comma-separated)")
+  parser.add_argument("-c", "--client", help="client implementations (comma-separated)")
   return parser.parse_args()
 
 def random_string(length: int):
@@ -34,11 +36,15 @@ class LogFileFormatter(logging.Formatter):
 class InteropRunner:
   results = {}
   compliant = {}
+  _servers = {}
+  _clients = {}
 
-  def __init__(self):
-    for server in IMPLEMENTATIONS:
+  def __init__(self, servers: dict, clients: dict):
+    self._servers = servers
+    self._clients = clients
+    for server in servers:
       self.results[server] = {}
-      for client in IMPLEMENTATIONS:
+      for client in clients:
         self.results[server][client] = {
           TestResult.SUCCEEDED: [],
           TestResult.FAILED: [],
@@ -114,10 +120,10 @@ class InteropRunner:
     t = prettytable.PrettyTable()
     t.hrules = prettytable.ALL
     t.vrules = prettytable.ALL
-    t.field_names = [ "" ] + [ name for name in IMPLEMENTATIONS ]
-    for server in IMPLEMENTATIONS:
+    t.field_names = [ "" ] + [ name for name in self._clients ]
+    for server in self._servers:
       row = [ server ]
-      for client in IMPLEMENTATIONS:
+      for client in self._clients:
         cell = self.results[server][client]
         res = colored(get_letters(cell[TestResult.SUCCEEDED]), "green") + "\n"
         res += colored(get_letters(cell[TestResult.UNSUPPORTED]), "yellow") + "\n"
@@ -189,8 +195,8 @@ class InteropRunner:
     if os.path.exists("logs/"):
       shutil.rmtree("logs/")
     
-    for server in IMPLEMENTATIONS:
-      for client in IMPLEMENTATIONS:
+    for server in self._servers:
+      for client in self._clients:
         print("Running with server:", server, "and client:", client)
         if not (self._check_impl_is_compliant(server) and self._check_impl_is_compliant(client)):
           print("Not compliant, skipping")
@@ -209,4 +215,14 @@ if get_args().debug:
 else:
   logging.basicConfig(stream=sys.stderr, level=logging.WARNING)
 
-InteropRunner().run()
+def get_impls(arg) -> dict:
+  if not arg:
+    return IMPLEMENTATIONS
+  impls = {}
+  for s in arg.split(","):
+    if s not in IMPLEMENTATIONS:
+      sys.exit("Implementation " + s + " not found.")
+    impls[s] = IMPLEMENTATIONS[s]
+  return impls
+    
+InteropRunner(get_impls(get_args().server), get_impls(get_args().client)).run()
