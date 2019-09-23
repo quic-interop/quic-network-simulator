@@ -120,10 +120,10 @@ class InteropRunner:
     t = prettytable.PrettyTable()
     t.hrules = prettytable.ALL
     t.vrules = prettytable.ALL
-    t.field_names = [ "" ] + [ name for name in self._clients ]
-    for server in self._servers:
-      row = [ server ]
-      for client in self._clients:
+    t.field_names = [ "" ] + [ name for name in self._servers ]
+    for client in self._clients:
+      row = [ client ]
+      for server in self._servers:
         cell = self.results[server][client]
         res = colored(get_letters(cell[TestResult.SUCCEEDED]), "green") + "\n"
         res += colored(get_letters(cell[TestResult.UNSUPPORTED]), "yellow") + "\n"
