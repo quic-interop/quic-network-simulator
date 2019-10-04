@@ -1,4 +1,4 @@
-import os, random, shutil, subprocess, string, logging, sys, tempfile, argparse, re
+import copy, os, random, shutil, subprocess, string, logging, sys, tempfile, argparse, re
 from typing import List
 from termcolor import colored
 from enum import Enum
@@ -16,6 +16,7 @@ def get_args():
   parser.add_argument("-s", "--server", help="server implementations (comma-separated)")
   parser.add_argument("-c", "--client", help="client implementations (comma-separated)")
   parser.add_argument("-t", "--test", help="test cases (comma-separatated)")
+  parser.add_argument("-r", "--replace", help="replace path of implementation. Example: -r myquicimpl=dockertagname")
   return parser.parse_args()
 
 def random_string(length: int):
@@ -67,7 +68,7 @@ class InteropRunner:
     client_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_client_")
 
     # check that the client is capable of returning UNSUPPORTED
-    logging.info("Checking compliance of %s client", name)
+    logging.debug("Checking compliance of %s client", name)
     cmd = (
         "TESTCASE=" + random_string(6) + " "
         "SERVER_LOGS=/dev/null "
@@ -84,10 +85,10 @@ class InteropRunner:
       logging.debug("%s", output.stdout.decode('utf-8'))
       self.compliant[name] = False
       return False
-    logging.info("%s client compliant.", name)
+    logging.debug("%s client compliant.", name)
 
     # check that the server is capable of returning UNSUPPORTED
-    logging.info("Checking compliance of %s server", name)
+    logging.debug("Checking compliance of %s server", name)
     sim_log_dir.cleanup()
     sim_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_sim_")
     server_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_server_")
@@ -200,9 +201,9 @@ class InteropRunner:
     
     for server in self._servers:
       for client in self._clients:
-        print("Running with server:", server, "and client:", client)
+        logging.info("Running with server %s (%s) and client %s (%s)", server, self._servers[server], client, self._clients[client])
         if not (self._check_impl_is_compliant(server) and self._check_impl_is_compliant(client)):
-          print("Not compliant, skipping")
+          logging.info("Not compliant, skipping")
           continue
 
         # run the test cases
@@ -219,17 +220,29 @@ console = logging.StreamHandler(stream=sys.stderr)
 if get_args().debug:
   console.setLevel(logging.DEBUG)
 else:
-  console.setLevel(logging.WARNING)
+  console.setLevel(logging.INFO)
 logger.addHandler(console)
+
+implementations = copy.deepcopy(IMPLEMENTATIONS)
+replace_arg = get_args().replace
+if replace_arg:
+  for s in replace_arg.split(","):
+    pair = s.split("=")
+    if len(pair) != 2:
+      sys.exit("Invalid format for replace")
+    name, image = pair[0], pair[1]
+    if name not in IMPLEMENTATIONS:
+      sys.exit("Implementation " + name + " not found.")
+    implementations[name] = image
 
 def get_impls(arg) -> dict:
   if not arg:
-    return IMPLEMENTATIONS
+    return implementations
   impls = {}
   for s in arg.split(","):
-    if s not in IMPLEMENTATIONS:
+    if s not in implementations:
       sys.exit("Implementation " + s + " not found.")
-    impls[s] = IMPLEMENTATIONS[s]
+    impls[s] = implementations[s]
   return impls
 
 def get_tests(arg) -> List[testcases.TestCase]:
