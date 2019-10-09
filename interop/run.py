@@ -5,7 +5,7 @@ from enum import Enum
 import prettytable
 
 import testcases
-from run_these_tests import TESTCASES
+from testcases import TESTCASES
 from implementations import IMPLEMENTATIONS
 
 def get_args():
@@ -15,6 +15,7 @@ def get_args():
                       help='turn on debug logs')
   parser.add_argument("-s", "--server", help="server implementations (comma-separated)")
   parser.add_argument("-c", "--client", help="client implementations (comma-separated)")
+  parser.add_argument("-t", "--test", help="test cases (comma-separatated)")
   return parser.parse_args()
 
 def random_string(length: int):
@@ -38,8 +39,10 @@ class InteropRunner:
   compliant = {}
   _servers = {}
   _clients = {}
+  _tests = []
 
-  def __init__(self, servers: dict, clients: dict):
+  def __init__(self, servers: dict, clients: dict, tests: List[testcases.TestCase]):
+    self._tests = tests
     self._servers = servers
     self._clients = clients
     for server in servers:
@@ -203,7 +206,7 @@ class InteropRunner:
           continue
 
         # run the test cases
-        for testcase in TESTCASES:
+        for testcase in self._tests:
           status = self._run_testcase(server, client, testcase)
           self.results[server][client][status] += [ testcase ]
 
@@ -228,5 +231,19 @@ def get_impls(arg) -> dict:
       sys.exit("Implementation " + s + " not found.")
     impls[s] = IMPLEMENTATIONS[s]
   return impls
+
+def get_tests(arg) -> List[testcases.TestCase]:
+  if not arg:
+    return TESTCASES
+  tests = []
+  for t in arg.split(","):
+    if t not in [ str(n) for n in TESTCASES ]:
+      sys.exit("Test case " + t + " not found.")
+    tests += [ n for n in TESTCASES if str(n)==t ]
+  return tests 
     
-InteropRunner(get_impls(get_args().server), get_impls(get_args().client)).run()
+InteropRunner(
+  servers=get_impls(get_args().server), 
+  clients=get_impls(get_args().client),
+  tests=get_tests(get_args().test),
+).run()

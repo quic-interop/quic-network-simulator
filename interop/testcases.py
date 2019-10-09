@@ -130,3 +130,11 @@ class TestCaseResumption(TestCase):
 
   def check(self):
     return self._check_files()
+
+
+TESTCASES = [ 
+  TestCaseHandshake(),
+  TestCaseTransfer(),
+  TestCaseRetry(),
+  TestCaseResumption(),
+]
