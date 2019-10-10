@@ -79,7 +79,7 @@ class InteropRunner:
         "CLIENT=" + IMPLEMENTATIONS[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up --timeout 0 --abort-on-container-exit sim client"
       )
-    output = subprocess.run(cmd, shell=True, capture_output=True)
+    output = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if not self._is_unsupported(output.stdout.splitlines()):
       logging.error("%s client not compliant.", name)
       logging.debug("%s", output.stdout.decode('utf-8'))
@@ -101,7 +101,7 @@ class InteropRunner:
         "SERVER=" + IMPLEMENTATIONS[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up server"
       )
-    output = subprocess.run(cmd, shell=True, capture_output=True)
+    output = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if not self._is_unsupported(output.stdout.splitlines()):
       logging.error("%s server not compliant.", name)
       logging.debug("%s", output.stdout.decode('utf-8'))
@@ -164,7 +164,7 @@ class InteropRunner:
       "REQUESTS=\"" + reqs + "\" "
       "docker-compose -f ../docker-compose.yml -f interop.yml up --abort-on-container-exit --timeout 1"
     )
-    output = subprocess.run(cmd, shell=True, capture_output=True)
+    output = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     logging.debug("%s", output.stdout.decode('utf-8'))
 
     lines = output.stdout.splitlines()
