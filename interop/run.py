@@ -13,10 +13,10 @@ def get_args():
   parser.add_argument('-d', '--debug', action='store_const',
                       const=True, default=False,
                       help='turn on debug logs')
-  parser.add_argument("-s", "--server", help="server implementations (comma-separated)")
-  parser.add_argument("-c", "--client", help="client implementations (comma-separated)")
-  parser.add_argument("-t", "--test", help="test cases (comma-separatated)")
-  parser.add_argument("-r", "--replace", help="replace path of implementation. Example: -r myquicimpl=dockertagname")
+  parser.add_argument("-s", "--server", action="append", help="server implementations")
+  parser.add_argument("-c", "--client", action="append", help="client implementations")
+  parser.add_argument("-t", "--test", action="append", help="test cases")
+  parser.add_argument("-r", "--replace", action="append", help="replace path of implementation. Example: -r myquicimpl=dockertagname")
   return parser.parse_args()
 
 def random_string(length: int):
@@ -162,7 +162,7 @@ class InteropRunner:
       "CLIENT=" + IMPLEMENTATIONS[client] + " "
       "SERVER=" + IMPLEMENTATIONS[server] + " "
       "REQUESTS=\"" + reqs + "\" "
-      "docker-compose -f ../docker-compose.yml -f interop.yml up --abort-on-container-exit --timeout 1"
+      "docker-compose -f ../docker-compose.yml -f interop.yml up --abort-on-container-exit --timeout 0"
     )
     output = subprocess.run(cmd, shell=True, capture_output=True)
     logging.debug("%s", output.stdout.decode('utf-8'))
@@ -226,7 +226,7 @@ logger.addHandler(console)
 implementations = copy.deepcopy(IMPLEMENTATIONS)
 replace_arg = get_args().replace
 if replace_arg:
-  for s in replace_arg.split(","):
+  for s in replace_arg:
     pair = s.split("=")
     if len(pair) != 2:
       sys.exit("Invalid format for replace")
@@ -239,7 +239,7 @@ def get_impls(arg) -> dict:
   if not arg:
     return implementations
   impls = {}
-  for s in arg.split(","):
+  for s in arg:
     if s not in implementations:
       sys.exit("Implementation " + s + " not found.")
     impls[s] = implementations[s]
@@ -249,7 +249,7 @@ def get_tests(arg) -> List[testcases.TestCase]:
   if not arg:
     return TESTCASES
   tests = []
-  for t in arg.split(","):
+  for t in arg:
     if t not in [ str(n) for n in TESTCASES ]:
       sys.exit("Test case " + t + " not found.")
     tests += [ n for n in TESTCASES if str(n)==t ]
