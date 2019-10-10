@@ -131,10 +131,27 @@ class TestCaseResumption(TestCase):
   def check(self):
     return self._check_files()
 
+class TestCaseHTTP3(TestCase):
+  def __init__(self):
+    self._name = "http3"
+    self._abbreviation = "3"
+
+  def get_paths(self):
+    self._files = [ 
+      self._generate_random_file(5*KB),
+      self._generate_random_file(10*KB),
+      self._generate_random_file(500*KB),
+    ]
+    return self._files
+
+  def check(self):
+    return self._check_files()
+
 
 TESTCASES = [ 
   TestCaseHandshake(),
   TestCaseTransfer(),
   TestCaseRetry(),
   TestCaseResumption(),
+  TestCaseHTTP3(),
 ]
