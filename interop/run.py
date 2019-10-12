@@ -164,7 +164,7 @@ class InteropRunner:
       "SERVER_LOGS=" + server_log_dir.name + " "
       "CLIENT_LOGS=" + client_log_dir.name + " "
       "SIM_LOGS=" + sim_log_dir.name + " "
-      "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
+      "SCENARIO=\"" + testcase.scenario() + "\" "
       "CLIENT=" + self._implementations[client] + " "
       "SERVER=" + self._implementations[server] + " "
       "REQUESTS=\"" + reqs + "\" "

@@ -17,7 +17,8 @@ class TestCase(abc.ABC):
   _files = []
   _www_dir = None
   _download_dir = None
-
+  _scenario = "simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25"
+  
   def __str__(self):
     return self._name
 
@@ -33,6 +34,9 @@ class TestCase(abc.ABC):
     if not self._download_dir:
       self._download_dir = tempfile.TemporaryDirectory(dir = "/tmp", prefix = "download_")
     return self._download_dir.name + "/"
+
+  def scenario(self):
+    return self._scenario
 
   # see https://www.stefanocappellini.it/generate-pseudorandom-bytes-with-python/ for benchmarks
   def _generate_random_file(self, size: int):
@@ -196,6 +200,19 @@ class TestCaseHTTP3(TestCase):
   def check(self):
     return self._check_files()
 
+class TestCaseThroughput(TestCase):
+  def __init__(self):
+    self._name = "throughput"
+    self._abbreviation = "T"
+    self._scenario = "simple-p2p --delay=30ms --bandwidth=10Mbps --queue=25"
+
+  def get_paths(self):
+    self._files = [self._generate_random_file(10*MB)]
+    return self._files
+
+  def check(self):
+    return self._check_files()
+
 
 TESTCASES = [ 
   TestCaseHandshake(),
@@ -203,4 +220,5 @@ TESTCASES = [
   TestCaseRetry(),
   TestCaseResumption(),
   TestCaseHTTP3(),
+  TestCaseThroughput(),
 ]
