@@ -1,6 +1,9 @@
 import os
 from implementations import IMPLEMENTATIONS
 
+print("Pulling the simulator...")
+os.system("docker pull martenseemann/quic-network-simulator")
+
 for name in IMPLEMENTATIONS:
-    cmd = "docker pull " + IMPLEMENTATIONS[name]
-    os.system(cmd)
+  print("\nPulling " + name + "...")
+  os.system("docker pull " + IMPLEMENTATIONS[name])
