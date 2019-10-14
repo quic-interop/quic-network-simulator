@@ -79,7 +79,7 @@ class InteropRunner:
         "CLIENT_LOGS=" + client_log_dir.name + " " 
         "SIM_LOGS=" + sim_log_dir.name + " "
         "WWW=" + www_dir.name + " "
-        "DOWNLOADS=" + downloads_dir + " "
+        "DOWNLOADS=" + downloads_dir.name + " "
         "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
         "CLIENT=" + self._implementations[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up --timeout 0 --abort-on-container-exit sim client"
@@ -103,7 +103,7 @@ class InteropRunner:
         "CLIENT_LOGS=/dev/null "
         "SIM_LOGS=" + sim_log_dir.name + " "
         "WWW=" + www_dir.name + " "
-        "DOWNLOADS=" + downloads_dir + " "
+        "DOWNLOADS=" + downloads_dir.name + " "
         "SERVER=" + self._implementations[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up server"
       )
