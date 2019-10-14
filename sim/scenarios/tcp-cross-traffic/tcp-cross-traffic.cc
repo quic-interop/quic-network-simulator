@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
   NetDeviceContainer devices = p2p.Install(sim.GetLeftNode(), sim.GetRightNode());
   Ipv4AddressHelper ipv4;
-  ipv4.SetBase("192.168.50.0", "255.255.255.0");
+  ipv4.SetBase("193.167.50.0", "255.255.255.0");
   Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
 
   NodeContainer nodes;
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
   NetDeviceContainer devices_source = p2p_source.Install(sim.GetRightNode(), source_node);
   Ipv4AddressHelper ipv4_source;
-  ipv4_source.SetBase("192.168.49.0", "255.255.255.0");
+  ipv4_source.SetBase("193.167.49.0", "255.255.255.0");
   Ipv4InterfaceContainer interfaces_source = ipv4_source.Assign(devices_source);
 
   QuicPointToPointHelper p2p_sink;
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
   NetDeviceContainer devices_sink = p2p_sink.Install(sink_node, sim.GetLeftNode());
   Ipv4AddressHelper ipv4_sink;
-  ipv4_sink.SetBase("192.168.51.0", "255.255.255.0");
+  ipv4_sink.SetBase("193.167.51.0", "255.255.255.0");
   Ipv4InterfaceContainer interfaces_sink = ipv4_sink.Assign(devices_sink);
 
   uint16_t port = 9;   // Discard port (RFC 863)
