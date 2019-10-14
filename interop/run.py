@@ -68,6 +68,8 @@ class InteropRunner:
 
     sim_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_sim_")
     client_log_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="logs_client_")
+    www_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="compliance_www_")
+    downloads_dir = tempfile.TemporaryDirectory(dir="/tmp", prefix="compliance_downloads_")
 
     # check that the client is capable of returning UNSUPPORTED
     logging.debug("Checking compliance of %s client", name)
@@ -76,7 +78,8 @@ class InteropRunner:
         "SERVER_LOGS=/dev/null "
         "CLIENT_LOGS=" + client_log_dir.name + " " 
         "SIM_LOGS=" + sim_log_dir.name + " "
-        "WWW=/dev/null DOWNLOADS=/dev/null "
+        "WWW=" + www_dir.name + " "
+        "DOWNLOADS=" + downloads_dir + " "
         "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
         "CLIENT=" + self._implementations[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up --timeout 0 --abort-on-container-exit sim client"
@@ -99,7 +102,8 @@ class InteropRunner:
         "SERVER_LOGS=" + server_log_dir.name + " "
         "CLIENT_LOGS=/dev/null "
         "SIM_LOGS=" + sim_log_dir.name + " "
-        "WWW=/dev/null DOWNLOADS=/dev/null "
+        "WWW=" + www_dir.name + " "
+        "DOWNLOADS=" + downloads_dir + " "
         "SERVER=" + self._implementations[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up server"
       )
