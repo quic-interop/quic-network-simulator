@@ -166,6 +166,12 @@ class TestCaseRetry(TestCase):
   def check(self, log_dir: tempfile.TemporaryDirectory) -> bool:
     if not self._check_files():
       return False
+#    packets = TraceAnalyzer(log_dir.name + "/trace_node_left.pcap").get_all_packets(Direction.ALL)
+#    for p in packets:
+#      if (p.quic):
+#        print(p.quic.field_names)
+#        if (p.quic):
+#          print(p.sniff_time)
     return self._check_trace(log_dir)
     
 
@@ -210,7 +216,7 @@ class TestCaseThroughput(TestCase):
     self._files = [self._generate_random_file(10*MB)]
     return self._files
 
-  def check(self):
+  def check(self, log_dir: tempfile.TemporaryDirectory):
     return self._check_files()
 
 
