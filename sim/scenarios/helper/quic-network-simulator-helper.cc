@@ -40,9 +40,9 @@ QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
   right_node_ = nodes.Get(1);
 
   NS_LOG_INFO("Create eth0");
-  installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("192.168.0.2", "255.255.255.0"));
+  installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"));
   NS_LOG_INFO("Create eth1");
-  installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("192.168.100.2", "255.255.255.0"));
+  installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"));
 }
 
 void QuicNetworkSimulatorHelper::Run(Time duration) {

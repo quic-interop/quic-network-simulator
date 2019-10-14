@@ -10,9 +10,9 @@ IP=`hostname -I`
 GATEWAY="${IP%.*}.2"
 UNNEEDED_ROUTE="${IP%.*}.0"
 
-echo "192.168.0.100 client" >> /etc/hosts
-echo "192.168.100.100 server" >> /etc/hosts
+echo "193.167.0.100 client" >> /etc/hosts
+echo "193.167.100.100 server" >> /etc/hosts
 
-route add -net 192.168.0.0 netmask 255.255.0.0 gw $GATEWAY
+route add -net 193.167.0.0 netmask 255.255.0.0 gw $GATEWAY
 # delete unused route
 route del -net $UNNEEDED_ROUTE netmask 255.255.255.0

@@ -14,8 +14,8 @@ simulator (as found in the [sim](sim) directory), and a client and a server (as
 found in the individual QUIC implementation directories, or for a simple shell,
 the [endpoint](endpoint) directory).
 
-The framework uses two networks on the host machine: `leftnet` (192.168.0.0/24)
-and `rightnet` (192.168.100.0/24). `leftnet` is connected to the client docker
+The framework uses two networks on the host machine: `leftnet` (193.167.0.0/24)
+and `rightnet` (193.167.100.0/24). `leftnet` is connected to the client docker
 image, and `rightnet` is connected to the server. The ns-3 simulation sits in
 the middle and forwards packets between `leftnet` and `rightnet`.
 
@@ -26,7 +26,7 @@ the middle and forwards packets between `leftnet` and `rightnet`.
 |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|‾‾‾‾‾‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
 |     client    |     | docker-bridge |     eth0    |     |        |     |     eth1      | docker-bridge |     |      server     |
 |               |-----|               |             |-----|  ns-3  |-----|               |               |-----|                 |
-| 192.168.0.100 |     |  192.168.0.1  | 192.168.0.2 |     |        |     | 192.168.100.2 | 192.168.100.1 |     | 192.168.100.100 |
+| 193.167.0.100 |     |  193.167.0.1  | 193.167.0.2 |     |        |     | 193.167.100.2 | 193.167.100.1 |     | 193.167.100.100 |
 |_______________|     |_______________|_____________|     |________|     |_______________|_______________|     |_________________|
                                       |                                                  |
                                       |__________________________________________________|
