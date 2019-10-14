@@ -38,14 +38,16 @@ class LogFileFormatter(logging.Formatter):
 class InteropRunner:
   results = {}
   compliant = {}
+  _implementations = {}
   _servers = {}
   _clients = {}
   _tests = []
 
-  def __init__(self, servers: dict, clients: dict, tests: List[testcases.TestCase]):
+  def __init__(self, implementations: dict, servers: dict, clients: dict, tests: List[testcases.TestCase]):
     self._tests = tests
     self._servers = servers
     self._clients = clients
+    self._implementations = implementations
     for server in servers:
       self.results[server] = {}
       for client in clients:
@@ -76,7 +78,7 @@ class InteropRunner:
         "SIM_LOGS=" + sim_log_dir.name + " "
         "WWW=/dev/null DOWNLOADS=/dev/null "
         "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
-        "CLIENT=" + IMPLEMENTATIONS[name] + " "
+        "CLIENT=" + self._implementations[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up --timeout 0 --abort-on-container-exit sim client"
       )
     output = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -98,7 +100,7 @@ class InteropRunner:
         "CLIENT_LOGS=/dev/null "
         "SIM_LOGS=" + sim_log_dir.name + " "
         "WWW=/dev/null DOWNLOADS=/dev/null "
-        "SERVER=" + IMPLEMENTATIONS[name] + " "
+        "SERVER=" + self._implementations[name] + " "
         "docker-compose -f ../docker-compose.yml -f interop.yml up server"
       )
     output = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -159,8 +161,8 @@ class InteropRunner:
       "CLIENT_LOGS=" + client_log_dir.name + " "
       "SIM_LOGS=" + sim_log_dir.name + " "
       "SCENARIO=\"simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25\" "
-      "CLIENT=" + IMPLEMENTATIONS[client] + " "
-      "SERVER=" + IMPLEMENTATIONS[server] + " "
+      "CLIENT=" + self._implementations[client] + " "
+      "SERVER=" + self._implementations[server] + " "
       "REQUESTS=\"" + reqs + "\" "
       "docker-compose -f ../docker-compose.yml -f interop.yml up --abort-on-container-exit --timeout 1"
     )
@@ -256,6 +258,7 @@ def get_tests(arg) -> List[testcases.TestCase]:
   return tests 
     
 InteropRunner(
+  implementations=implementations,
   servers=get_impls(get_args().server), 
   clients=get_impls(get_args().client),
   tests=get_tests(get_args().test),
