@@ -203,7 +203,7 @@ class TestCaseHTTP3(TestCase):
 
 class TestCaseGoodput(TestCase):
   def __init__(self):
-    self._name = "throughput"
+    self._name = "goodput"
     self._abbreviation = "G"
     self._scenario = "simple-p2p --delay=30ms --bandwidth=10Mbps --queue=25"
 
