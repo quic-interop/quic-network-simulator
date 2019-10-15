@@ -24,7 +24,7 @@ class TraceAnalyzer:
   def get_all_packets(self, direction: Direction = Direction.ALL) -> pyshark.FileCapture:
     """ Get all packets.
     """
-    f = self._get_dirction_filter(direction)
+    f = self._get_dirction_filter(direction) + "quic"
     return pyshark.FileCapture(self._filename, display_filter=f)
     
   def get_retry(self, direction: Direction = Direction.ALL) -> pyshark.FileCapture:

@@ -1,5 +1,6 @@
 import abc, filecmp, os, string, tempfile, random, logging, sys
 from Crypto.Cipher import AES
+from datetime import timedelta
 
 from trace import TraceAnalyzer, Direction
 
@@ -166,12 +167,6 @@ class TestCaseRetry(TestCase):
   def check(self, log_dir: tempfile.TemporaryDirectory) -> bool:
     if not self._check_files():
       return False
-#    packets = TraceAnalyzer(log_dir.name + "/trace_node_left.pcap").get_all_packets(Direction.ALL)
-#    for p in packets:
-#      if (p.quic):
-#        print(p.quic.field_names)
-#        if (p.quic):
-#          print(p.sniff_time)
     return self._check_trace(log_dir)
     
 
@@ -206,19 +201,34 @@ class TestCaseHTTP3(TestCase):
   def check(self):
     return self._check_files()
 
-class TestCaseThroughput(TestCase):
+class TestCaseGoodput(TestCase):
   def __init__(self):
     self._name = "throughput"
-    self._abbreviation = "T"
+    self._abbreviation = "G"
     self._scenario = "simple-p2p --delay=30ms --bandwidth=10Mbps --queue=25"
 
   def get_paths(self):
     self._files = [self._generate_random_file(10*MB)]
     return self._files
 
-  def check(self, log_dir: tempfile.TemporaryDirectory):
-    return self._check_files()
+  def check(self, log_dir: tempfile.TemporaryDirectory) -> bool:
+    if not self._check_files():
+      return False
+    packets = TraceAnalyzer(log_dir.name + "/trace_node_left.pcap").get_all_packets(Direction.FROM_CLIENT)
+    
+    first = 0
+    for p in packets:
+      if (first == 0):
+        first = p.sniff_time
+      last = p.sniff_time
 
+    if (last - first == 0):
+      return False
+    time = (last - first) / timedelta(milliseconds = 1)
+    goodput = (10 * 1024 * 1024 * 8) / time
+    print("time: ", time, "Goodput:", goodput, "kbps")
+    return True
+    
 
 TESTCASES = [ 
   TestCaseHandshake(),
@@ -226,5 +236,5 @@ TESTCASES = [
   TestCaseRetry(),
   TestCaseResumption(),
   TestCaseHTTP3(),
-  TestCaseThroughput(),
+  TestCaseGoodput(),
 ]
