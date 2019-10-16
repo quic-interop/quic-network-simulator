@@ -217,6 +217,7 @@ class TestCaseGoodput(TestCase):
     packets = TraceAnalyzer(log_dir.name + "/trace_node_left.pcap").get_all_packets(Direction.FROM_CLIENT)
     
     first = 0
+    last = 0
     for p in packets:
       if (first == 0):
         first = p.sniff_time
