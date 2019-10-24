@@ -1,13 +1,14 @@
-FROM ubuntu:19.04
+FROM ubuntu:19.10
 
 RUN apt-get update && \
   apt-get install -y git mercurial python3 unzip unrar build-essential cmake wget \
   gdb net-tools tcpdump iptables iproute2 iputils-ping vim
 
-RUN wget https://www.nsnam.org/release/ns-allinone-3.30.tar.bz2 && \
-  tar xjf ns-allinone-3.30.tar.bz2
+RUN wget https://www.nsnam.org/release/ns-allinone-3.30.1.tar.bz2 && \
+  tar xjf ns-allinone-3.30.1.tar.bz2 && \
+  rm ns-allinone-3.30.1.tar.bz2
 
-WORKDIR /ns-allinone-3.30/ns-3.30
+WORKDIR /ns-allinone-3.30.1/ns-3.30.1
 
 RUN ./waf configure --build-profile=optimized
 RUN ./waf build
