@@ -33,7 +33,7 @@ RUN apt-get update && \
   apt-get clean
 
 WORKDIR /ns3
-COPY --from=builder /ns-allinone-3.30.1/ns-3.30.1/out/src/fd-net-device/*optimized /ns3/src/fd-net-device/
+COPY --from=builder /ns-allinone-3.30.1/ns-3.30.1/out/src/fd-net-device/*optimized /ns-allinone-3.30.1/ns-3.30.1/out/src/fd-net-device/*debug /ns3/src/fd-net-device/
 COPY --from=builder /ns-allinone-3.30.1/ns-3.30.1/out/scratch/*/* /ns3/scratch/
 COPY --from=builder /ns-allinone-3.30.1/ns-3.30.1/out/lib/ /ns3/lib
 
