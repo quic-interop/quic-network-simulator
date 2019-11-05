@@ -22,6 +22,7 @@ services:
         ipv4_address: 193.167.100.2
 
   server:
+    build: ./$SERVER
     image: $SERVER
     container_name: server
     hostname: server
@@ -41,6 +42,7 @@ services:
         ipv4_address: 193.167.100.100
 
   client:
+    build: ./$CLIENT
     image: $CLIENT
     container_name: client
     hostname: client
