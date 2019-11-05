@@ -19,4 +19,11 @@ iptables -A FORWARD -i eth0 -o eth1 -j DROP
 iptables -A FORWARD -i eth1 -o eth0 -j DROP
 
 echo "Using scenario:" $SCENARIO
-eval ./scratch/"$SCENARIO"
+
+eval ./scratch/"$SCENARIO &"
+
+PID=`jobs -p`
+trap "kill -SIGINT $PID" INT
+trap "kill -SIGTERM $PID" TERM
+trap "kill -SIGKILL $PID" KILL
+wait
