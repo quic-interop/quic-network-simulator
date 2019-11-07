@@ -9,6 +9,9 @@ RUN wget https://www.nsnam.org/release/ns-allinone-3.30.1.tar.bz2 && \
 
 WORKDIR /ns-allinone-3.30.1/ns-3.30.1
 
+COPY pcap.patch .
+RUN patch -p0 < pcap.patch
+
 RUN mkdir out/
 RUN ./waf configure --build-profile=optimized --out=out/
 RUN ./waf build

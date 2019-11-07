@@ -1,0 +1,29 @@
+--- src/network/utils/pcap-file copy.cc
++++ src/network/utils/pcap-file.cc
+@@ -426,7 +426,7 @@
+   m_file.write ((const char *)&header.m_tsUsec, sizeof(header.m_tsUsec));
+   m_file.write ((const char *)&header.m_inclLen, sizeof(header.m_inclLen));
+   m_file.write ((const char *)&header.m_origLen, sizeof(header.m_origLen));
+-  NS_BUILD_DEBUG(m_file.flush());
++  m_file.flush();
+   return inclLen;
+ }
+ 
+@@ -436,7 +436,7 @@
+   NS_LOG_FUNCTION (this << tsSec << tsUsec << &data << totalLen);
+   uint32_t inclLen = WritePacketHeader (tsSec, tsUsec, totalLen);
+   m_file.write ((const char *)data, inclLen);
+-  NS_BUILD_DEBUG(m_file.flush());
++  m_file.flush();
+ }
+ 
+ void 
+@@ -445,7 +445,7 @@
+   NS_LOG_FUNCTION (this << tsSec << tsUsec << p);
+   uint32_t inclLen = WritePacketHeader (tsSec, tsUsec, p->GetSize ());
+   p->CopyData (&m_file, inclLen);
+-  NS_BUILD_DEBUG(m_file.flush());
++  m_file.flush();
+ }
+ 
+ void 

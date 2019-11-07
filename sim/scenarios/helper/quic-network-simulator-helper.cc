@@ -14,13 +14,6 @@
 
 using namespace ns3;
 
-void onSignal(int signum) {
-  std::cout << "Received signal: " << signum << std::endl;
-  // see https://gitlab.com/nsnam/ns-3-dev/issues/102
-  Simulator::Stop();
-  NS_FATAL_ERROR(signum);
-}
-
 void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue macAddress, Ipv4InterfaceAddress ipv4Address) {
   EmuFdNetDeviceHelper emu;
   emu.SetDeviceName(deviceName);
@@ -52,10 +45,6 @@ QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
 }
 
 void QuicNetworkSimulatorHelper::Run(Time duration) {
-  signal(SIGTERM, onSignal);
-  signal(SIGINT, onSignal);
-  signal(SIGKILL, onSignal);
-
   Ipv4GlobalRoutingHelper::PopulateRoutingTables();
   // write the routing table to file
   Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("dynamic-global-routing.routes", std::ios::out);
