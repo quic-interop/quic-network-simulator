@@ -62,7 +62,7 @@ Follow these steps to set up your own QUIC implementation:
     ```
 
 1. Now, copy the script below into `run_endpoint.sh`, and add commands as
-   instructed. Logs should be recorded in `/qnslogs` for them to be available
+   instructed. Logs should be recorded in `/logs` for them to be available
    after simulation completion (more on this later).
 
     ```bash
