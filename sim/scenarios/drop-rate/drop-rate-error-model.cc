@@ -13,12 +13,15 @@ TypeId DropRateErrorModel::GetTypeId(void) {
 }
  
 DropRateErrorModel::DropRateErrorModel()
-    : rate(0), rng(rd()), distr(0, 99) { }
+    : rate(0), distr(0, 99) {
+    std::random_device rd;
+    rng = new std::mt19937(rd());
+}
 
 void DropRateErrorModel::DoReset(void) { }
  
 bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p) {
-    if (distr(rng) >= rate)
+    if (distr(*rng) >= rate)
         return false;
     cout << "Dropping packet" << endl;
     return true;

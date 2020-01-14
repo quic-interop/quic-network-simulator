@@ -16,8 +16,7 @@ class DropRateErrorModel : public ErrorModel {
     
  private:
     int rate;
-    std::random_device rd;
-    std::mt19937 rng;
+    std::mt19937 *rng;
     std::uniform_int_distribution<> distr;
 
     bool DoCorrupt (Ptr<Packet> p);
