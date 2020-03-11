@@ -17,8 +17,8 @@ This scenario has the following configurable properties:
 * `--queue`: Queue size of the queue attached to the link. Specified in
   packets. This is a required parameter. For example `--queue=25`.
 
-* `--rate_to_client`: A value between 0 and 100 specifying the packet drop rate
-  (in percentage) in the server to client direction. This is a required
+* `--rate_to_client`: A value between 0 and 100 specifying the packet corruption
+  rate (in percentage) in the server to client direction. This is a required
   parameter. For example, `--rate_to_client=10`.
 
 * `--rate_to_server`: Same as `rate_to_client` but in the other direction.
