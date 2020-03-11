@@ -7,7 +7,9 @@
 
 using namespace ns3;
 
-// The DropRateErrorModel drops random packets, at a user-specified drop rate. 
+// The DropRateErrorModel drops random packets, at approximately a
+// user-specified drop rate. However, it will not create burst losses of more
+// than 3 packets.
 class DropRateErrorModel : public ErrorModel {
  public:
     static TypeId GetTypeId(void);
@@ -16,6 +18,7 @@ class DropRateErrorModel : public ErrorModel {
     
  private:
     int rate;
+    int consecutivelyCorrupted;
     std::mt19937 *rng;
     std::uniform_int_distribution<> distr;
 
