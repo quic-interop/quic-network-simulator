@@ -1,0 +1,45 @@
+#include <cstdint>
+#include <vector>
+
+#include "quic-packet.h"
+
+#include "ns3/packet.h"
+#include "ns3/ppp-header.h"
+#include "ns3/ipv4-header.h"
+#include "ns3/udp-header.h"
+
+using namespace ns3;
+using namespace std;
+
+QuicPacket::QuicPacket(Ptr<Packet> p) : p_(p) {
+    const uint32_t p_len = p->GetSize();
+    uint8_t *buffer= new uint8_t[p_len];
+    p->CopyData(buffer, p_len);
+    ppp_hdr_ = PppHeader();
+    uint32_t ppp_hdr_len = p->RemoveHeader(ppp_hdr_);
+    ipv4_hdr_ = Ipv4Header();
+    uint32_t ip_hdr_len = p->RemoveHeader(ipv4_hdr_);
+    udp_hdr_ = UdpHeader();
+    udp_hdr_len_ = p->RemoveHeader(udp_hdr_);
+    total_hdr_len_ = ppp_hdr_len + ip_hdr_len + udp_hdr_len_;
+    udp_payload_ = vector<uint8_t>(&buffer[total_hdr_len_], &buffer[total_hdr_len_] + p_len - total_hdr_len_);
+}
+
+vector<uint8_t>& QuicPacket::GetUdpPayload() { return udp_payload_; }
+
+void QuicPacket::ReassemblePacket() {
+    // Start with the UDP payload.
+    Packet new_p = Packet(udp_payload_.data(), udp_payload_.size());
+    // Add the UDP header and make sure to recalculate the checksum.
+    udp_hdr_.ForcePayloadSize(udp_payload_.size() + udp_hdr_len_);
+    udp_hdr_.ForceChecksum(0);
+    udp_hdr_.InitializeChecksum(ipv4_hdr_.GetSource(), ipv4_hdr_.GetDestination(), ipv4_hdr_.GetProtocol());
+    new_p.AddHeader(udp_hdr_);
+    // Add the IP header, again make sure to recalculate the checksum.
+    ipv4_hdr_.EnableChecksum();
+    new_p.AddHeader(ipv4_hdr_);
+    // Add the PPP header.
+    new_p.AddHeader(ppp_hdr_);
+    p_->RemoveAtEnd(p_->GetSize());
+    p_->AddAtEnd(Ptr<Packet>(&new_p));
+}

@@ -1,6 +1,6 @@
 --- wscript.orig
 +++ wscript
-@@ -758,12 +758,14 @@
+@@ -758,12 +758,15 @@
  
      try:
          for filename in os.listdir("scratch"):
@@ -13,6 +13,7 @@
                  obj.source = obj.path.ant_glob('*.cc')
 +                obj.source.append('../helper/quic-network-simulator-helper.cc')
 +                obj.source.append('../helper/quic-point-to-point-helper.cc')
++                obj.source.append('../helper/quic-packet.cc')
                  obj.target = filename
                  obj.name = obj.target
                  obj.install_path = None
