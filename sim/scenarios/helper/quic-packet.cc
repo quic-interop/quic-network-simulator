@@ -27,6 +27,11 @@ QuicPacket::QuicPacket(Ptr<Packet> p) : p_(p) {
 
 vector<uint8_t>& QuicPacket::GetUdpPayload() { return udp_payload_; }
 
+bool QuicPacket::IsVersionNegotiationPacket() {
+    if(udp_payload_.size() <= 5) return false;
+    return udp_payload_[1] == 0 && udp_payload_[2] == 0 && udp_payload_[3] == 0 && udp_payload_[4] == 0;
+}
+
 void QuicPacket::ReassemblePacket() {
     // Start with the UDP payload.
     Packet new_p = Packet(udp_payload_.data(), udp_payload_.size());

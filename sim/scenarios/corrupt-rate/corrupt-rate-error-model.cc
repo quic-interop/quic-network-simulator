@@ -33,6 +33,13 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
     if (distr(*rng) >= rate) return false;
 
     QuicPacket qp = QuicPacket(p);
+    // Don't corrupt Version Negotiation packets.
+    // Version Negotiation packets are expected to be sent when the version field of the Initial was corrupted.
+    // Client are supposed to ignore Version Negotiation packets that contain the version that they offered.
+    if(qp.IsVersionNegotiationPacket()) {
+        qp.ReassemblePacket();
+        return false;
+    }
     // Corrupt a byte in the 50 bytes of the UDP payload.
     // This way, we will frequenetly hit the QUIC header.
     std::uniform_int_distribution<> d(0,  min(uint32_t(50), p->GetSize() - 1));
