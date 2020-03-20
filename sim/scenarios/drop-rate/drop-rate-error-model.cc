@@ -1,3 +1,4 @@
+#include "../helper/quic-packet.h"
 #include "drop-rate-error-model.h"
 
 using namespace std;
@@ -21,9 +22,10 @@ DropRateErrorModel::DropRateErrorModel()
 void DropRateErrorModel::DoReset(void) { }
  
 bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p) {
-    if (distr(*rng) >= rate)
-        return false;
-    cout << "Dropping packet" << endl;
+    if (distr(*rng) >= rate) return false;
+
+    QuicPacket qp = QuicPacket(p);
+    cout << "Dropping packet (" << qp.GetUdpPayload().size() << " bytes) from " << qp.GetIpv4Header().GetSource() << endl;
     return true;
 }
 
