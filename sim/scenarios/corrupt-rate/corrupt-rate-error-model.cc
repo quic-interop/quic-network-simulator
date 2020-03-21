@@ -30,9 +30,14 @@ CorruptRateErrorModel::CorruptRateErrorModel()
 void CorruptRateErrorModel::DoReset(void) { }
 
 bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
-    if (distr(*rng) >= rate) return false;
-
     QuicPacket qp = QuicPacket(p);
+
+    if(distr(*rng) >= rate) {
+        cout << "Forwarding packet (size: " << qp.GetUdpPayload().size() << ")" << endl;
+        qp.ReassemblePacket();
+        return false;
+    }
+
     // Don't corrupt Version Negotiation packets.
     // Version Negotiation packets are expected to be sent when the version field of the Initial was corrupted.
     // Client are supposed to ignore Version Negotiation packets that contain the version that they offered.
