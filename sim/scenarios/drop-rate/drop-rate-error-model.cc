@@ -22,9 +22,14 @@ DropRateErrorModel::DropRateErrorModel()
 void DropRateErrorModel::DoReset(void) { }
  
 bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p) {
-    if (distr(*rng) >= rate) return false;
-
     QuicPacket qp = QuicPacket(p);
+
+    if (distr(*rng) >= rate) {
+        cout << "Forwarding packet (size: " << qp.GetUdpPayload().size() << ")" << endl;
+        qp.ReassemblePacket();
+        return false;
+    }
+
     cout << "Dropping packet (" << qp.GetUdpPayload().size() << " bytes) from " << qp.GetIpv4Header().GetSource() << endl;
     return true;
 }
