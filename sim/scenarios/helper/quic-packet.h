@@ -19,6 +19,7 @@ public:
     // It uses the PPP, IP and UDP header that it parsed from the original packet,
     // and recalculates IP and UDP checksums.
     void ReassemblePacket();
+    Ipv4Header& GetIpv4Header();
     vector<uint8_t>& GetUdpPayload();
     bool IsVersionNegotiationPacket();
 

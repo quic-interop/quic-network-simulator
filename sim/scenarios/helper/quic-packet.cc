@@ -25,6 +25,8 @@ QuicPacket::QuicPacket(Ptr<Packet> p) : p_(p) {
     udp_payload_ = vector<uint8_t>(&buffer[total_hdr_len_], &buffer[total_hdr_len_] + p_len - total_hdr_len_);
 }
 
+Ipv4Header& QuicPacket::GetIpv4Header() { return ipv4_hdr_; }
+
 vector<uint8_t>& QuicPacket::GetUdpPayload() { return udp_payload_; }
 
 bool QuicPacket::IsVersionNegotiationPacket() {
