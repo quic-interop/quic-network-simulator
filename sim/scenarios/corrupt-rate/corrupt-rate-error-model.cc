@@ -47,11 +47,17 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
     }
     // Corrupt a byte in the 50 bytes of the UDP payload.
     // This way, we will frequenetly hit the QUIC header.
-    std::uniform_int_distribution<> d(0,  min(uint32_t(50), p->GetSize() - 1));
-    auto pos = d(*rng);
+    std::uniform_int_distribution<> d(0, min(uint32_t(50), p->GetSize() - 1));
+    int pos = d(*rng);
     vector<uint8_t>& payload = qp.GetUdpPayload();
-    cout << "Corrupting byte " << pos << " of the UDP payload (total: " << payload.size() << ")" << endl;
-    payload[pos] ^= 0xff;
+    // Replace the byte at position pos with a random value.
+    while(true) {
+        uint8_t n = std::uniform_int_distribution<>(0, 255)(*rng);
+        if(payload[pos] == n) continue;
+        printf("Corrupting byte %d (%#x -> %#x) of the UDP payload (total: %d)\n", pos, payload[pos], n, (int) payload.size());
+        payload[pos] = n;
+        break;
+    }
     qp.ReassemblePacket();
     return false;
 }
