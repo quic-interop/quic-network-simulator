@@ -1,7 +1,7 @@
-FROM ubuntu:19.10 AS builder
+FROM ubuntu:20.04 AS builder
 
 RUN apt-get update && \
-  apt-get install -y python3 build-essential cmake wget
+  DEBIAN_FRONTEND=noninteractive apt-get install -y python3 build-essential cmake wget
 
 RUN wget https://www.nsnam.org/release/ns-allinone-3.30.1.tar.bz2 && \
   tar xjf ns-allinone-3.30.1.tar.bz2 && \
@@ -26,7 +26,7 @@ RUN ./waf build  && \
   cd out/scratch && rm -r subdir helper scratch-simulator*
 
 
-FROM ubuntu:19.10
+FROM ubuntu:20.04
 
 RUN apt-get update && \
   apt-get install -y net-tools iptables && \
