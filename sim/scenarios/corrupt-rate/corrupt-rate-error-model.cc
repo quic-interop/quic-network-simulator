@@ -33,7 +33,7 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
     QuicPacket qp = QuicPacket(p);
 
     if(distr(*rng) >= rate) {
-        cout << "Forwarding packet (size: " << qp.GetUdpPayload().size() << ")" << endl;
+        cout << "Forwarding packet (" << qp.GetUdpPayload().size() << " bytes) from " << qp.GetIpv4Header().GetSource() << endl;
         qp.ReassemblePacket();
         return false;
     }
@@ -58,6 +58,7 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
         payload[pos] = n;
         break;
     }
+    cout << "Corrupted packet (" << qp.GetUdpPayload().size() << " bytes) from " << qp.GetIpv4Header().GetSource() << endl;
     qp.ReassemblePacket();
     return false;
 }
