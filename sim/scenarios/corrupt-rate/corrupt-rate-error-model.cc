@@ -54,11 +54,10 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
     while(true) {
         uint8_t n = std::uniform_int_distribution<>(0, 255)(*rng);
         if(payload[pos] == n) continue;
-        printf("Corrupting byte %d (%#x -> %#x) of the UDP payload (total: %d)\n", pos, payload[pos], n, (int) payload.size());
+        cout << "Corrupted packet (" << qp.GetUdpPayload().size() << " bytes) from" << qp.GetIpv4Header().GetSource() << " at offset " << pos << " (0x" << std::hex << payload[pos] << " -> 0x" << n << ")";
         payload[pos] = n;
         break;
     }
-    cout << "Corrupted packet (" << qp.GetUdpPayload().size() << " bytes) from " << qp.GetIpv4Header().GetSource() << endl;
     qp.ReassemblePacket();
     return false;
 }
