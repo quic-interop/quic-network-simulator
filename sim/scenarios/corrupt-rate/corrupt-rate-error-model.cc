@@ -54,7 +54,7 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
     while(true) {
         uint8_t n = std::uniform_int_distribution<>(0, 255)(*rng);
         if(payload[pos] == n) continue;
-        cout << "Corrupted packet (" << qp.GetUdpPayload().size() << " bytes) from" << qp.GetIpv4Header().GetSource() << " at offset " << pos << " (0x" << std::hex << payload[pos] << " -> 0x" << n << ")";
+        cout << "Corrupted packet (" << qp.GetUdpPayload().size() << " bytes) from " << qp.GetIpv4Header().GetSource() << " at offset " << pos << " (0x" << std::hex << (unsigned int) payload[pos] << " -> 0x" << (unsigned int) n << ")" << std::dec << endl;
         payload[pos] = n;
         break;
     }
