@@ -1,0 +1,38 @@
+name: Build Docker images
+on: 
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  endpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build endpoint
+        uses: docker/build-push-action@v1
+        with:
+          push: ${{ github.event == 'push' }}
+          path: endpoint/
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: martenseemann/quic-network-simulator-endpoint
+          tags: latest
+          tag_with_ref: true
+          add_git_labels: true
+  simulator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build simulator
+        uses: docker/build-push-action@v1
+        with:
+          push: ${{ github.event == 'push' }}
+          path: sim/
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: martenseemann/quic-network-simulator
+          tags: latest
+          tag_with_ref: true
+          add_git_labels: true
