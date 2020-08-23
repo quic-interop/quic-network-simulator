@@ -1,4 +1,4 @@
-version: "3.5"
+version: "2.4" # IPv6 support requires docker-compose version 2.x
 
 services:
   sim:
@@ -18,8 +18,10 @@ services:
     networks:
       leftnet:
         ipv4_address: 193.167.0.2
+        ipv6_address: fd00::0002
       rightnet:
         ipv4_address: 193.167.100.2
+        ipv6_address: fd00::0100:0002
 
   server:
     build: ./$SERVER
@@ -40,8 +42,10 @@ services:
     networks:
       rightnet:
         ipv4_address: 193.167.100.100
+        ipv6_address: fd00::100:100
     extra_hosts:
       - "client:193.167.0.100"
+      - "client6:fd00::0100"
 
   client:
     build: ./$CLIENT
@@ -62,17 +66,23 @@ services:
     networks:
       leftnet:
         ipv4_address: 193.167.0.100
+        ipv6_address: fd00::100
     extra_hosts:
       - "server:193.167.100.100"
+      - "server6:fd00::0100:0100"
 
 networks:
   leftnet:
     driver: bridge
+    enable_ipv6: true
     ipam:
       config:
         - subnet: 193.167.0.0/24
+        - subnet: fd00::0000/112
   rightnet:
     driver: bridge
+    enable_ipv6: true
     ipam:
       config:
         - subnet: 193.167.100.0/24
+        - subnet: fd00::0100:0000/112

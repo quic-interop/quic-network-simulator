@@ -21,7 +21,7 @@ void onSignal(int signum) {
   NS_FATAL_ERROR(signum);
 }
 
-void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue macAddress, Ipv4InterfaceAddress ipv4Address) {
+void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue macAddress, Ipv4InterfaceAddress ipv4Address, Ipv6InterfaceAddress ipv6Address) {
   EmuFdNetDeviceHelper emu;
   emu.SetDeviceName(deviceName);
   NetDeviceContainer devices = emu.Install(node);
@@ -29,10 +29,16 @@ void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue 
   device->SetAttribute("Address", macAddress);
 
   Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
-  uint32_t interface = ipv4->AddInterface(device);
-  ipv4->AddAddress(interface, ipv4Address);
-  ipv4->SetMetric(interface, 1);
-  ipv4->SetUp(interface);
+  uint32_t interface_v4 = ipv4->AddInterface(device);
+  ipv4->AddAddress(interface_v4, ipv4Address);
+  ipv4->SetMetric(interface_v4, 1);
+  ipv4->SetUp(interface_v4);
+
+  Ptr<Ipv6> ipv6 = node->GetObject<Ipv6>();
+  uint32_t interface_v6 = ipv6->AddInterface(device);
+  ipv6->AddAddress(interface_v6, ipv6Address);
+  ipv6->SetMetric(interface_v6, 1);
+  ipv6->SetUp(interface_v6);
 }
 
 QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
@@ -47,8 +53,8 @@ QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
   left_node_ = nodes.Get(0);
   right_node_ = nodes.Get(1);
 
-  installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"));
-  installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"));
+  installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00::2", "ffff:ffff:ffff:ffff:ffff:ffff:ffff::"));
+  installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00::100:2", "ffff:ffff:ffff:ffff:ffff:ffff:ffff::"));
 }
 
 void QuicNetworkSimulatorHelper::Run(Time duration) {
@@ -57,9 +63,13 @@ void QuicNetworkSimulatorHelper::Run(Time duration) {
   signal(SIGKILL, onSignal);
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables();
-  // write the routing table to file
-  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("dynamic-global-routing.routes", std::ios::out);
+  // write the IPv4 routing table to file
+  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("dynamic-global-routing.routes.ipv4", std::ios::out);
   Ipv4RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
+
+  // write the IPv6 routing table to file
+  Ptr<OutputStreamWrapper> routingStream_v6 = Create<OutputStreamWrapper>("dynamic-global-routing.routes.ipv6", std::ios::out);
+  Ipv6RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream_v6);
 
   Simulator::Stop(duration);
   RunSynchronizer();

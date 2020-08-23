@@ -31,7 +31,11 @@ int main(int argc, char *argv[]) {
   NetDeviceContainer devices = p2p.Install(sim.GetLeftNode(), sim.GetRightNode());
   Ipv4AddressHelper ipv4;
   ipv4.SetBase("193.167.50.0", "255.255.255.0");
-  Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
+  Ipv4InterfaceContainer interfacesIPv4 = ipv4.Assign(devices);
+
+  Ipv6AddressHelper ipv6;
+  ipv6.SetBase("fd00::50:", "ffff:ffff:ffff:ffff:ffff:ffff:ffff::");
+  Ipv6InterfaceContainer interfacesIPv6 = ipv6.Assign(devices);
 
   sim.Run(Seconds(36000));
 }
