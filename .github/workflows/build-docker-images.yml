@@ -1,7 +1,7 @@
 name: Build Docker images
 on: 
   push:
-    branches: [ master ]
+    branches: [ master, tmp ]
   pull_request:
     branches: [ master ]
 
@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: echo ${{ github.event_name }}
       - name: Build endpoint
         uses: docker/build-push-action@v1
         with:
