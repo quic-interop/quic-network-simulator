@@ -20,6 +20,7 @@ public:
     // and recalculates IP and UDP checksums.
     void ReassemblePacket();
     Ipv4Header& GetIpv4Header();
+    UdpHeader& GetUdpHeader();
     vector<uint8_t>& GetUdpPayload();
     bool IsVersionNegotiationPacket();
 
