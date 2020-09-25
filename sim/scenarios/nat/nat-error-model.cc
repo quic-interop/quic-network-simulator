@@ -15,17 +15,17 @@ TypeId NATErrorModel::GetTypeId(void) {
 
 NATErrorModel::NATErrorModel()
     : client("193.167.0.100"), server("193.167.100.100"), nat(client),
-      change_addr(false) {
+      do_cgn(false) {
   rng = CreateObject<UniformRandomVariable>();
 }
 
 void NATErrorModel::DoReset() {}
 
-void NATErrorModel::SetAddrChangeFlag(bool change) { change_addr = change; }
+void NATErrorModel::SetCGN(bool cgn) { do_cgn = cgn; }
 
 void NATErrorModel::DoRebind() {
   const Ipv4Address old_nat = nat;
-  if (change_addr)
+  if (do_cgn)
     do {
       nat.Set((old_nat.Get() & 0xffffff00) | rng->GetInteger(1, 0xfe));
     } while (nat == old_nat || nat == client);
@@ -39,9 +39,9 @@ void NATErrorModel::DoRebind() {
     while (rev.find(b.second) != rev.end());
     rev[b.second] = b.first;
     rev[old_port] = 0;
-    cout << Simulator::Now().GetSeconds()
-         << "s: " << (change_addr ? "CGN" : "NAT") << " rebinding: " << old_nat
-         << ":" << old_port << " -> " << nat << ":" << b.second << endl;
+    cout << Simulator::Now().GetSeconds() << "s: " << (do_cgn ? "CGN" : "NAT")
+         << " rebinding: " << old_nat << ":" << old_port << " -> " << nat << ":"
+         << b.second << endl;
   }
 
   // for (auto &b : fwd)

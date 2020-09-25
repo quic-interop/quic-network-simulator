@@ -19,7 +19,7 @@ void rebind(Ptr<NATErrorModel> em, const Time next) {
 
 int main(int argc, char *argv[]) {
   string delay, bandwidth, queue, first_rebind = "0s", rebind_freq = "0s";
-  bool addr = false;
+  bool cgn = false;
   CommandLine cmd;
   cmd.AddValue("delay", "delay of the p2p link", delay);
   cmd.AddValue("bandwidth", "bandwidth of the p2p link", bandwidth);
@@ -29,7 +29,8 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("rebind_freq",
                "NAT rebind frequency (e.g., 3s; 0 to disable repeated rebinds)",
                rebind_freq);
-  cmd.AddValue("addr", "change client IP address when rebinding", addr);
+  cmd.AddValue("cgn", "act as CGN; change client IP address when rebinding",
+               cgn);
   cmd.Parse(argc, argv);
 
   NS_ABORT_MSG_IF(delay.length() == 0, "Missing parameter: delay");
@@ -51,7 +52,7 @@ int main(int argc, char *argv[]) {
   Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
 
   Ptr<NATErrorModel> em = CreateObject<NATErrorModel>();
-  em->SetAddrChangeFlag(addr);
+  em->SetCGN(cgn);
   em->Enable();
 
   devices.Get(0)->SetAttribute("ReceiveErrorModel", PointerValue(em));
