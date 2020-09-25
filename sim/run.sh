@@ -22,8 +22,6 @@ echo "Using scenario:" $SCENARIO
 
 eval ./scratch/"$SCENARIO &"
 
-tcpdump -i eth1 -w /logs/sim.pcap &
-
 PID=`jobs -p`
 trap "kill -SIGINT $PID" INT
 trap "kill -SIGTERM $PID" TERM

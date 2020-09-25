@@ -29,7 +29,7 @@ RUN ./waf build  && \
 FROM ubuntu:20.04
 
 RUN apt-get update && \
-  apt-get install -y net-tools iptables tcpdump && \
+  apt-get install -y net-tools iptables && \
   apt-get clean
 
 WORKDIR /ns3

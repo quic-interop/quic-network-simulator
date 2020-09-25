@@ -28,13 +28,13 @@ public:
   void SetDrop(int packet_num);
   Ptr<UniformRandomVariable> rng;
   void DoRebind();
-  void SetAddrChangeFlag(bool change_addr);
+  void SetAddrChangeFlag(bool change);
 
 private:
   bool DoCorrupt(Ptr<Packet> p);
   void DoReset(void);
   Ipv4Address client, server, nat;
-  bool change_client_addr;
+  bool change_addr;
 
   unordered_map<uint16_t, uint16_t> fwd, rev;
 };

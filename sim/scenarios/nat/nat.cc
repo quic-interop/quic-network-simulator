@@ -12,7 +12,6 @@ using namespace std;
 NS_LOG_COMPONENT_DEFINE("ns3 simulator");
 
 void rebind(Ptr<NATErrorModel> em, const Time next) {
-  cout << Simulator::Now().GetSeconds() << "s: NAT rebinding" << endl;
   em->DoRebind();
   if (!next.IsZero())
     Simulator::Schedule(next, &rebind, em, next);
