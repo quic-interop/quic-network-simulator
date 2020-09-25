@@ -4,7 +4,6 @@
 #include "../helper/quic-packet.h"
 #include "ns3/error-model.h"
 #include "ns3/random-variable-stream.h"
-#include <set>
 #include <unordered_map>
 
 using namespace ns3;
