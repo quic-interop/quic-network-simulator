@@ -61,7 +61,8 @@ bool RebindErrorModel::DoCorrupt(Ptr<Packet> p) {
 
   } else if (src_ip_in == server) {
     if (rev[dst_port_in] == 0) {
-      cout << "unknown binding for destination " << dst_ip_in << ":"
+      cout << Simulator::Now().GetSeconds() << "s: "
+           << "unknown binding for destination " << dst_ip_in << ":"
            << dst_port_in << ", dropping packet" << endl;
       return true;
     }
@@ -69,7 +70,8 @@ bool RebindErrorModel::DoCorrupt(Ptr<Packet> p) {
     qp.GetUdpHeader().SetDestinationPort(rev[dst_port_in]);
 
   } else {
-    cout << "unknown source " << src_ip_in << ", dropping packet" << endl;
+    cout << Simulator::Now().GetSeconds() << "s: "
+         << "unknown source " << src_ip_in << ", dropping packet" << endl;
     return true;
   }
 
