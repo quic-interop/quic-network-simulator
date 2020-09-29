@@ -1,31 +1,31 @@
-#include "nat-error-model.h"
+#include "rebind-error-model.h"
 #include "ns3/core-module.h"
 #include <cassert>
 
 using namespace std;
 
-NS_OBJECT_ENSURE_REGISTERED(NATErrorModel);
+NS_OBJECT_ENSURE_REGISTERED(RebindErrorModel);
 
-TypeId NATErrorModel::GetTypeId(void) {
-  static TypeId tid = TypeId("NATErrorModel")
+TypeId RebindErrorModel::GetTypeId(void) {
+  static TypeId tid = TypeId("RebindErrorModel")
                           .SetParent<ErrorModel>()
-                          .AddConstructor<NATErrorModel>();
+                          .AddConstructor<RebindErrorModel>();
   return tid;
 }
 
-NATErrorModel::NATErrorModel()
+RebindErrorModel::RebindErrorModel()
     : client("193.167.0.100"), server("193.167.100.100"), nat(client),
-      do_cgn(false) {
+      rebind_addr(false) {
   rng = CreateObject<UniformRandomVariable>();
 }
 
-void NATErrorModel::DoReset() {}
+void RebindErrorModel::DoReset() {}
 
-void NATErrorModel::SetCGN(bool cgn) { do_cgn = cgn; }
+void RebindErrorModel::SetRebindAddr(bool ra) { rebind_addr = ra; }
 
-void NATErrorModel::DoRebind() {
+void RebindErrorModel::DoRebind() {
   const Ipv4Address old_nat = nat;
-  if (do_cgn)
+  if (rebind_addr)
     do {
       nat.Set((old_nat.Get() & 0xffffff00) | rng->GetInteger(1, 0xfe));
     } while (nat == old_nat || nat == client);
@@ -39,18 +39,13 @@ void NATErrorModel::DoRebind() {
     while (rev.find(b.second) != rev.end());
     rev[b.second] = b.first;
     rev[old_port] = 0;
-    cout << Simulator::Now().GetSeconds() << "s: " << (do_cgn ? "CGN" : "NAT")
+    cout << Simulator::Now().GetSeconds() << "s: "
          << " rebinding: " << old_nat << ":" << old_port << " -> " << nat << ":"
          << b.second << endl;
   }
-
-  // for (auto &b : fwd)
-  //   cout << "fwd: " << b.first << " -> " << b.second << endl;
-  // for (auto &b : rev)
-  //   cout << "rev: " << b.first << " -> " << b.second << endl;
 }
 
-bool NATErrorModel::DoCorrupt(Ptr<Packet> p) {
+bool RebindErrorModel::DoCorrupt(Ptr<Packet> p) {
   QuicPacket qp = QuicPacket(p);
 
   const Ipv4Address &src_ip_in = qp.GetIpv4Header().GetSource();
@@ -66,7 +61,7 @@ bool NATErrorModel::DoCorrupt(Ptr<Packet> p) {
 
   } else if (src_ip_in == server) {
     if (rev[dst_port_in] == 0) {
-      cout << "unknown NAT binding for destination " << dst_ip_in << ":"
+      cout << "unknown binding for destination " << dst_ip_in << ":"
            << dst_port_in << ", dropping packet" << endl;
       return true;
     }

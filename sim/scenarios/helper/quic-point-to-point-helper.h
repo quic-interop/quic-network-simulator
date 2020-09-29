@@ -2,7 +2,6 @@
 #define QUIC_POINT_TO_POINT_HELPER_H
 
 #include "ns3/point-to-point-module.h"
-#include "ns3/string.h"
 
 using namespace ns3;
 
