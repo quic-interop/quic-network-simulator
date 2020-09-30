@@ -15,15 +15,15 @@ int main(int argc, char *argv[]) {
     std::string delay, bandwidth, queue, client_rate, server_rate;
     std::random_device rand_dev;
     std::mt19937 generator(rand_dev());  // Seed random number generator first
-    Ptr<CorruptRateErrorModel> client_drops = CreateObject<CorruptRateErrorModel>();
-    Ptr<CorruptRateErrorModel> server_drops = CreateObject<CorruptRateErrorModel>();
+    Ptr<CorruptRateErrorModel> client_corrupts = CreateObject<CorruptRateErrorModel>();
+    Ptr<CorruptRateErrorModel> server_corrupts = CreateObject<CorruptRateErrorModel>();
     CommandLine cmd;
     
     cmd.AddValue("delay", "delay of the p2p link", delay);
     cmd.AddValue("bandwidth", "bandwidth of the p2p link", bandwidth);
     cmd.AddValue("queue", "queue size of the p2p link (in packets)", queue);
-    cmd.AddValue("rate_to_client", "packet drop rate (towards client)", client_rate);
-    cmd.AddValue("rate_to_server", "packet drop rate (towards server)", server_rate);
+    cmd.AddValue("rate_to_client", "packet corruption rate (towards client)", client_rate);
+    cmd.AddValue("rate_to_server", "packet corruption rate (towards server)", server_rate);
     cmd.Parse (argc, argv);
     
     NS_ABORT_MSG_IF(delay.length() == 0, "Missing parameter: delay");
@@ -32,9 +32,9 @@ int main(int argc, char *argv[]) {
     NS_ABORT_MSG_IF(client_rate.length() == 0, "Missing parameter: rate_to_client");
     NS_ABORT_MSG_IF(server_rate.length() == 0, "Missing parameter: rate_to_server");
 
-    // Set client and server drop rates.
-    client_drops->SetCorruptRate(stoi(client_rate));
-    server_drops->SetCorruptRate(stoi(server_rate));
+    // Set client and server corruption rates.
+    client_corrupts->SetCorruptRate(stoi(client_rate));
+    server_corrupts->SetCorruptRate(stoi(server_rate));
 
     QuicNetworkSimulatorHelper sim;
 
@@ -49,8 +49,8 @@ int main(int argc, char *argv[]) {
     ipv4.SetBase("193.167.50.0", "255.255.255.0");
     Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
     
-    devices.Get(0)->SetAttribute("ReceiveErrorModel", PointerValue(client_drops));
-    devices.Get(1)->SetAttribute("ReceiveErrorModel", PointerValue(server_drops));
+    devices.Get(0)->SetAttribute("ReceiveErrorModel", PointerValue(client_corrupts));
+    devices.Get(1)->SetAttribute("ReceiveErrorModel", PointerValue(server_corrupts));
     
     sim.Run(Seconds(36000));
 }

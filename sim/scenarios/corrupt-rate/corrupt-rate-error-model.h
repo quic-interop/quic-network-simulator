@@ -7,7 +7,7 @@
 
 using namespace ns3;
 
-// The CorruptRateErrorModel drops random packets, at a user-specified drop rate. 
+// The CorruptRateErrorModel corrupts random packets, at a user-specified rate.
 class CorruptRateErrorModel : public RateErrorModel {
  public:
     static TypeId GetTypeId(void);
