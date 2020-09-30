@@ -27,6 +27,8 @@ QuicPacket::QuicPacket(Ptr<Packet> p) : p_(p) {
 
 Ipv4Header& QuicPacket::GetIpv4Header() { return ipv4_hdr_; }
 
+UdpHeader& QuicPacket::GetUdpHeader() { return udp_hdr_; }
+
 vector<uint8_t>& QuicPacket::GetUdpPayload() { return udp_payload_; }
 
 bool QuicPacket::IsVersionNegotiationPacket() {
