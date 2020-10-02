@@ -18,8 +18,10 @@ services:
     networks:
       leftnet:
         ipv4_address: 193.167.0.2
+        ipv6_address: fd00:cafe:cafe:0::2
       rightnet:
         ipv4_address: 193.167.100.2
+        ipv6_address: fd00:cafe:cafe:100::2
 
   server:
     build: ./$SERVER
@@ -40,8 +42,10 @@ services:
     networks:
       rightnet:
         ipv4_address: 193.167.100.100
+        ipv6_address: fd00:cafe:cafe:100::100
     extra_hosts:
       - "client:193.167.0.100"
+      - "client:fd00:cafe:cafe:0::100"
 
   client:
     build: ./$CLIENT
@@ -62,21 +66,27 @@ services:
     networks:
       leftnet:
         ipv4_address: 193.167.0.100
+        ipv6_address: fd00:cafe:cafe:0::100
     extra_hosts:
       - "server:193.167.100.100"
+      - "server:fd00:cafe:cafe:100::100"
 
 networks:
   leftnet:
     driver: bridge
     driver_opts:
       com.docker.network.bridge.enable_ip_masquerade: 'false'
+    enable_ipv6: true
     ipam:
       config:
         - subnet: 193.167.0.0/24
+        - subnet: fd00:cafe:cafe:0::/64
   rightnet:
     driver: bridge
     driver_opts:
       com.docker.network.bridge.enable_ip_masquerade: 'false'
+    enable_ipv6: true
     ipam:
       config:
         - subnet: 193.167.100.0/24
+        - subnet: fd00:cafe:cafe:100::/64

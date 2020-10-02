@@ -21,7 +21,7 @@ void onSignal(int signum) {
   NS_FATAL_ERROR(signum);
 }
 
-void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue macAddress, Ipv4InterfaceAddress ipv4Address) {
+void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue macAddress, Ipv4InterfaceAddress ipv4Address, Ipv6InterfaceAddress ipv6Address) {
   EmuFdNetDeviceHelper emu;
   emu.SetDeviceName(deviceName);
   NetDeviceContainer devices = emu.Install(node);
@@ -33,6 +33,12 @@ void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue 
   ipv4->AddAddress(interface, ipv4Address);
   ipv4->SetMetric(interface, 1);
   ipv4->SetUp(interface);
+
+  Ptr<Ipv6> ipv6 = node->GetObject<Ipv6>();
+  interface = ipv6->AddInterface(device);
+  ipv6->AddAddress(interface, ipv6Address);
+  ipv6->SetMetric(interface, 1);
+  ipv6->SetUp(interface);
 }
 
 QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
@@ -47,8 +53,8 @@ QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
   left_node_ = nodes.Get(0);
   right_node_ = nodes.Get(1);
 
-  installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"));
-  installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"));
+  installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:0::2", 64));
+  installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:100::2", 64));
 }
 
 void QuicNetworkSimulatorHelper::Run(Time duration) {
@@ -57,9 +63,12 @@ void QuicNetworkSimulatorHelper::Run(Time duration) {
   signal(SIGKILL, onSignal);
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables();
+  // XXX Ipv6GlobalRoutingHelper does not exist in ns3, but v6 routing seems to work anyway?
+  // Ipv6GlobalRoutingHelper::PopulateRoutingTables();
   // write the routing table to file
   Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("dynamic-global-routing.routes", std::ios::out);
   Ipv4RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
+  Ipv6RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
 
   Simulator::Stop(duration);
   RunSynchronizer();

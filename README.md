@@ -14,22 +14,59 @@ simulator (as found in the [sim](sim) directory), and a client and a server (as
 found in the individual QUIC implementation directories, or for a simple shell,
 the [endpoint](endpoint) directory).
 
-The framework uses two networks on the host machine: `leftnet` (193.167.0.0/24)
-and `rightnet` (193.167.100.0/24). `leftnet` is connected to the client docker
-image, and `rightnet` is connected to the server. The ns-3 simulation sits in
-the middle and forwards packets between `leftnet` and `rightnet`.
+The framework uses two networks on the host machine: `leftnet` (IPv4
+193.167.0.0/24, IPv6 fd00:cafe:cafe:0::/64) and `rightnet` (IPv4
+193.167.100.0/24, IPv6 fd00:cafe:cafe:100::/64). `leftnet` is connected to the
+client docker image, and `rightnet` is connected to the server. The ns-3
+simulation sits in the middle and forwards packets between `leftnet` and
+`rightnet`.
 
 ```
-                                      |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
-                                      |                      sim                         |
-                                      |                                                  |      
-|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|‾‾‾‾‾‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|     |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
-|     client    |     | docker-bridge |     eth0    |     |        |     |     eth1      | docker-bridge |     |      server     |
-|               |-----|               |             |-----|  ns-3  |-----|               |               |-----|                 |
-| 193.167.0.100 |     |  193.167.0.1  | 193.167.0.2 |     |        |     | 193.167.100.2 | 193.167.100.1 |     | 193.167.100.100 |
-|_______________|     |_______________|_____________|     |________|     |_______________|_______________|     |_________________|
-                                      |                                                  |
-                                      |__________________________________________________|
+      +-----------------------+
+      |      client eth0      |
+      |                       |
+      |     193.167.0.100     |
+      | fd00:cafe:cafe:0::100 |
+      +----------+------------+
+                 |
+                 |
+      +----------+------------+
+      |     docker-bridge     |
+      |                       |
+      |      193.167.0.1      |
+      |  fd00:cafe:cafe:0::1  |
++-----------------------------------+
+|     |         eth0          |     |
+|     |                       |     |
+|     |      193.167.0.2      |     |
+|     |  fd00:cafe:cafe:0::2  |     |
+|     +----------+------------+     |
+|                |                  |
+|                |                  |
+|     +----------+------------+     |
+|     |         ns3           |     |
+|     +----------+------------+     |
+|                |                  |
+|                |                  |
+|     +----------+------------+     |
+|     |         eth1          |     |
+|     |                       |     |
+|     |     193.167.100.2     |     |
+|     | fd00:cafe:cafe:100::2 |  sim|
++-----------------------------------+
+      |     docker-bridge     |
+      |                       |
+      |     193.167.100.1     |
+      | fd00:cafe:cafe:100::1 |
+      +----------+------------+
+                 |
+                 |
+      +----------+------------+
+      |      server eth0      |
+      |                       |
+      |    193.167.100.100    |
+      |fd00:cafe:cafe:100::100|
+      +-----------------------+
 ```
 
 
