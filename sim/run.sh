@@ -19,6 +19,8 @@ ifconfig eth1 promisc
 # Drop those to make sure they actually take the path through ns3.
 iptables -A FORWARD -i eth0 -o eth1 -j DROP
 iptables -A FORWARD -i eth1 -o eth0 -j DROP
+ip6tables -A FORWARD -i eth0 -o eth1 -j DROP
+ip6tables -A FORWARD -i eth1 -o eth0 -j DROP
 
 if [[ -n "$WAITFORSERVER" ]]; then
   wait-for-it-quic -t 10s $WAITFORSERVER

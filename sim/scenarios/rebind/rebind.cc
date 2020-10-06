@@ -51,9 +51,6 @@ int main(int argc, char *argv[]) {
 
   NetDeviceContainer devices =
       p2p.Install(sim.GetLeftNode(), sim.GetRightNode());
-  Ipv4AddressHelper ipv4;
-  ipv4.SetBase("193.167.50.0", "255.255.255.0");
-  Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
 
   Ptr<RebindErrorModel> em = CreateObject<RebindErrorModel>();
   em->SetRebindAddr(rebind_addr);

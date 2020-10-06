@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -21,7 +21,7 @@ void onSignal(int signum) {
   NS_FATAL_ERROR(signum);
 }
 
-void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue macAddress, Ipv4InterfaceAddress ipv4Address, Ipv6InterfaceAddress ipv6Address) {
+uint32_t installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue macAddress, Ipv4InterfaceAddress ipv4Address, Ipv6InterfaceAddress ipv6Address) {
   EmuFdNetDeviceHelper emu;
   emu.SetDeviceName(deviceName);
   NetDeviceContainer devices = emu.Install(node);
@@ -39,6 +39,9 @@ void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue 
   ipv6->AddAddress(interface, ipv6Address);
   ipv6->SetMetric(interface, 1);
   ipv6->SetUp(interface);
+  ipv6->SetForwarding(interface, true);
+
+  return interface;
 }
 
 QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
@@ -53,8 +56,8 @@ QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
   left_node_ = nodes.Get(0);
   right_node_ = nodes.Get(1);
 
-  installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:0::2", 64));
-  installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:100::2", 64));
+  left_iface_ = installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:0::2", 64));
+  right_iface_ = installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:100::2", 64));
 }
 
 void QuicNetworkSimulatorHelper::Run(Time duration) {
@@ -63,10 +66,18 @@ void QuicNetworkSimulatorHelper::Run(Time duration) {
   signal(SIGKILL, onSignal);
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables();
-  // XXX Ipv6GlobalRoutingHelper does not exist in ns3, but v6 routing seems to work anyway?
-  // Ipv6GlobalRoutingHelper::PopulateRoutingTables();
+
+  // Ipv6GlobalRoutingHelper does not exist - fake it
+  Ptr<Ipv6StaticRouting> ipv6StaticRouting =
+    Ipv6RoutingHelper::GetRouting<Ipv6StaticRouting>(left_node_->GetObject<Ipv6>()->GetRoutingProtocol());
+  ipv6StaticRouting->SetDefaultRoute("fd00:cafe:cafe:100::2", 2);
+
+  ipv6StaticRouting =
+    Ipv6RoutingHelper::GetRouting<Ipv6StaticRouting>(right_node_->GetObject<Ipv6>()->GetRoutingProtocol());
+  ipv6StaticRouting->SetDefaultRoute("fd00:cafe:cafe:100::1", 2);
+
   // write the routing table to file
-  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("dynamic-global-routing.routes", std::ios::out);
+  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("/logs/dynamic-global-routing.routes", std::ios::out);
   Ipv4RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
   Ipv6RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
 
@@ -83,8 +94,8 @@ void QuicNetworkSimulatorHelper::RunSynchronizer() const {
   struct sockaddr_in addr;
   bzero((char *) &addr, sizeof(addr));
 
-  addr.sin_family = AF_INET;  
-  addr.sin_addr.s_addr = INADDR_ANY;  
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = INADDR_ANY;
   addr.sin_port = htons(57832);
 
   int res = bind(sockfd, (struct sockaddr *) &addr, sizeof(addr));
