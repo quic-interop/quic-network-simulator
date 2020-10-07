@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # We are using eth0 and eth1 as EmuFdNetDevices in ns3.
 # ns3 usually uses MAC address spoofing to separate ns3 from other traffic,
 # see https://www.nsnam.org/docs/models/html/fd-net-device.html#emufdnetdevicehelper.
@@ -17,6 +19,10 @@ ifconfig eth1 promisc
 # Drop those to make sure they actually take the path through ns3.
 iptables -A FORWARD -i eth0 -o eth1 -j DROP
 iptables -A FORWARD -i eth1 -o eth0 -j DROP
+
+if [[ -n "$WAITFORSERVER" ]]; then
+  wait-for-it-quic -t 10s $WAITFORSERVER
+fi
 
 echo "Using scenario:" $SCENARIO
 

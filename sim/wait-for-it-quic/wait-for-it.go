@@ -1,0 +1,70 @@
+package main
+
+import (
+	"bytes"
+	"flag"
+	"fmt"
+	"log"
+	"net"
+	"time"
+	"os"
+)
+
+// compose a packet that will elicit a Version Negotiation packet
+var packet = append([]byte{0xc0, 0x57, 0x41, 0x49, 0x54, 0, 0}, make([]byte, 1200)...)
+
+func main() {
+	startTime := time.Now()
+	var timeout time.Duration
+	flag.DurationVar(&timeout, "t", 0, "timeout (e.g. 10s)")
+	flag.Parse()
+	host := flag.Arg(0)
+	if flag.NArg() < 1 {
+		flag.Usage()
+		return
+	}
+	if timeout == 0 {
+		fmt.Printf("waiting for %s without a timeout\n", host)
+	} else {
+		fmt.Printf("waiting %s for %s\n", timeout, host)
+	}
+	addr, err := net.ResolveUDPAddr("udp", host)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for range time.NewTicker(time.Second/2).C {
+		dur := time.Since(startTime)
+		if timeout > 0 && dur > timeout {
+			fmt.Printf("Failed to connect after %s\n", dur)
+			os.Exit(1)
+		}
+		if err := waitForIt(addr); err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+	fmt.Printf("%s is available after %s\n", host, time.Since(startTime))
+}
+
+func waitForIt(addr *net.UDPAddr) error {
+	conn, err := net.DialUDP("udp", nil, addr)
+	if err != nil {
+		return err
+	}
+	if _, err := conn.Write(packet); err != nil {
+		return err
+	}
+	b := make([]byte, 1500)
+	n, err := conn.Read(b)
+	if err != nil {
+		return err
+	}
+	b = b[:n]
+	if len(b) < 5 {
+		log.Fatal("invalid packet")
+	}
+	if !bytes.Equal(b[1:5], []byte{0, 0, 0, 0}) {
+		log.Fatal("expected Version Negotiation packet")
+	}
+	return nil
+}
