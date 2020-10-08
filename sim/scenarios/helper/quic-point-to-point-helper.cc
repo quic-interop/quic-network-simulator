@@ -28,10 +28,9 @@ NetDeviceContainer QuicPointToPointHelper::Install(Ptr<Node> a, Ptr<Node> b) {
   ipv4.SetBase("193.167.50.0", "255.255.255.0");
   ipv4.Assign(devices);
 
-
-  // Ipv6AddressHelper ipv6;
-  // ipv6.SetBase("fd00:cafe:cafe:50::", 64);
-  // ipv6.Assign(devices);
+  Ipv6AddressHelper ipv6;
+  ipv6.SetBase("fd00:cafe:cafe:50::", 64);
+  ipv6.Assign(devices);
 
   return devices;
 }

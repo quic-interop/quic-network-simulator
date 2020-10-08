@@ -15,7 +15,6 @@ public:
 private:
   void RunSynchronizer() const;
   Ptr<Node> left_node_, right_node_;
-  uint32_t left_iface_, right_iface_;
 };
 
 #endif /* QUIC_NETWORK_SIMULATOR_HELPER_H */

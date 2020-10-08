@@ -1,3 +1,4 @@
+#include <cassert>
 #include <csignal>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,8 +39,8 @@ uint32_t installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressVa
   interface = ipv6->AddInterface(device);
   ipv6->AddAddress(interface, ipv6Address);
   ipv6->SetMetric(interface, 1);
-  ipv6->SetUp(interface);
   ipv6->SetForwarding(interface, true);
+  ipv6->SetUp(interface);
 
   return interface;
 }
@@ -56,8 +57,38 @@ QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
   left_node_ = nodes.Get(0);
   right_node_ = nodes.Get(1);
 
-  left_iface_ = installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:0::2", 64));
-  right_iface_ = installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:100::2", 64));
+  installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:0::2", 64));
+  installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:100::2", 64));
+}
+
+void massageIpv6Routing(Ptr<Node> local, Ptr<Node> peer) {
+  Ptr<Ipv6StaticRouting> routing = Ipv6RoutingHelper::GetRouting<Ipv6StaticRouting>(local->GetObject<Ipv6>()->GetRoutingProtocol());
+  for (uint32_t i = routing->GetNRoutes() - 1; i > 0; i--) {
+    Ipv6RoutingTableEntry route = routing->GetRoute(i);
+    if (route.GetDest() == "::1" || route.GetDest() == "fd00:cafe:cafe::" || route.GetDest() == "fd00:cafe:cafe:100::")
+      continue;
+    // std::cout << i << " XXX " << route.GetDest () << "\t"
+    //           << route.GetGateway () << "\t"
+    //           << route.GetInterface () << "\t"
+    //           << route.GetPrefixToUse () << "\t"
+    //           << std::endl;
+    routing->RemoveRoute(i);
+  }
+
+  Ptr<Ipv6> peer_ipv6 = peer->GetObject<Ipv6>();
+  Ipv6Address dst;
+  for (uint32_t i = 0; i < peer_ipv6->GetNInterfaces(); i++)
+    for (uint32_t j = 0; j < peer_ipv6->GetNAddresses(i); j++) {
+      // std::cout << i << " " << j << " " << peer_ipv6->GetAddress(i, j) << std::endl;
+      // std::cout << peer_ipv6->GetAddress(i, j).GetAddress().CombinePrefix(64) << std::endl;
+      if (peer_ipv6->GetAddress(i, j).GetAddress().CombinePrefix(64) == "fd00:cafe:cafe:50::") {
+        dst = peer_ipv6->GetAddress(i, j).GetAddress();
+        goto done;
+      }
+    }
+done:
+  assert(dst.IsInitialized());
+  routing->SetDefaultRoute(dst, 2);
 }
 
 void QuicNetworkSimulatorHelper::Run(Time duration) {
@@ -68,16 +99,11 @@ void QuicNetworkSimulatorHelper::Run(Time duration) {
   Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
   // Ipv6GlobalRoutingHelper does not exist - fake it
-  Ptr<Ipv6StaticRouting> ipv6StaticRouting =
-    Ipv6RoutingHelper::GetRouting<Ipv6StaticRouting>(left_node_->GetObject<Ipv6>()->GetRoutingProtocol());
-  ipv6StaticRouting->SetDefaultRoute("fd00:cafe:cafe:100::2", 2);
+  massageIpv6Routing(left_node_, right_node_);
+  massageIpv6Routing(right_node_, left_node_);
 
-  ipv6StaticRouting =
-    Ipv6RoutingHelper::GetRouting<Ipv6StaticRouting>(right_node_->GetObject<Ipv6>()->GetRoutingProtocol());
-  ipv6StaticRouting->SetDefaultRoute("fd00:cafe:cafe:100::1", 2);
-
-  // write the routing table to file
-  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("/logs/dynamic-global-routing.routes", std::ios::out);
+  // write the routing table to cout
+  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>(&std::cout);
   Ipv4RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
   Ipv6RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
 
