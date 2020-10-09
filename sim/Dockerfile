@@ -11,8 +11,7 @@ RUN mv /ns-allinone-$VERS/ns-$VERS /ns3
 WORKDIR /ns3
 
 RUN mkdir out/
-#--build-profile=optimized
-RUN ./waf configure --out=out/
+RUN ./waf configure --build-profile=optimized --out=out/
 RUN ./waf build
 
 # make including of the QuicNetworkSimulatorHelper class possible

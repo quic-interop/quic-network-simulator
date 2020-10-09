@@ -14,37 +14,15 @@ route add -net 193.167.0.0 netmask 255.255.0.0 gw $GATEWAY
 # delete unused route
 route del -net $UNNEEDED_ROUTE netmask 255.255.255.0
 
-echo FINAL V4 TABLE:
-netstat -rn
-echo
-
 # XXX this relies on the IPv6 address being second in the "hostname -I" output
-
-echo INITIAL V6 TABLE:
-netstat -6rn
-echo
 
 IP=$(echo "$IP" | cut -f2 -d" ")
 GATEWAY="${IP%:*}:2"
 UNNEEDED_ROUTE="${IP%:*}:"
 
-echo "IP $IP"
-echo "GATEWAY $GATEWAY"
-echo "UNNEEDED_ROUTE $UNNEEDED_ROUTE"
-
-echo ip -d route add fd00:cafe:cafe::/48 via $GATEWAY
-echo ip -d route del $UNNEEDED_ROUTE/64
-
 ip -d route add fd00:cafe:cafe::/48 via $GATEWAY
 # delete unused route
 ip -d route del $UNNEEDED_ROUTE/64
-
-echo
-echo FINAL V6 TABLE:
-netstat -6rn
-echo
-
-ifconfig -a
 
 # create the /logs and the /logs/qlog directory
 mkdir -p /logs/qlog
