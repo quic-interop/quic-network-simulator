@@ -36,10 +36,10 @@ uint32_t installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressVa
   ipv4->SetUp(interface);
 
   Ptr<Ipv6> ipv6 = node->GetObject<Ipv6>();
+  ipv6->SetAttribute("IpForward", BooleanValue(true));
   interface = ipv6->AddInterface(device);
   ipv6->AddAddress(interface, ipv6Address);
   ipv6->SetMetric(interface, 1);
-  ipv6->SetForwarding(interface, true);
   ipv6->SetUp(interface);
 
   return interface;
@@ -63,17 +63,19 @@ QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
 
 void massageIpv6Routing(Ptr<Node> local, Ptr<Node> peer) {
   Ptr<Ipv6StaticRouting> routing = Ipv6RoutingHelper::GetRouting<Ipv6StaticRouting>(local->GetObject<Ipv6>()->GetRoutingProtocol());
-  for (uint32_t i = routing->GetNRoutes() - 1; i > 0; i--) {
-    Ipv6RoutingTableEntry route = routing->GetRoute(i);
-    if (route.GetDest() == "::1" || route.GetDest() == "fd00:cafe:cafe::" || route.GetDest() == "fd00:cafe:cafe:100::")
-      continue;
-    // std::cout << i << " XXX " << route.GetDest () << "\t"
-    //           << route.GetGateway () << "\t"
-    //           << route.GetInterface () << "\t"
-    //           << route.GetPrefixToUse () << "\t"
-    //           << std::endl;
-    routing->RemoveRoute(i);
-  }
+  // for (uint32_t i = routing->GetNRoutes() - 1; i > 0; i--) {
+  //   Ipv6RoutingTableEntry route = routing->GetRoute(i);
+  //   if (route.GetDest() == "::1" ||
+  //       route.GetDest() == "fd00:cafe:cafe::" ||
+  //       route.GetDest() == "fd00:cafe:cafe:100::")
+  //     continue;
+  //   std::cout << i << " XXX " << route.GetDest () << "\t"
+  //             << route.GetGateway () << "\t"
+  //             << route.GetInterface () << "\t"
+  //             << route.GetPrefixToUse () << "\t"
+  //             << std::endl;
+  //   routing->RemoveRoute(i);
+  // }
 
   Ptr<Ipv6> peer_ipv6 = peer->GetObject<Ipv6>();
   Ipv6Address dst;
