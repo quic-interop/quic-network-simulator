@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
 	"os"
+	"time"
 )
 
 // compose a packet that will elicit a Version Negotiation packet
@@ -32,39 +32,54 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	for range time.NewTicker(time.Second/2).C {
-		dur := time.Since(startTime)
-		if timeout > 0 && dur > timeout {
-			fmt.Printf("Failed to connect after %s\n", dur)
-			os.Exit(1)
-		}
-		if err := waitForIt(addr); err == nil {
-			break
-		}
-		time.Sleep(time.Second)
+	ok := waitForIt(addr, timeout)
+	dur := time.Since(startTime)
+	if !ok {
+		fmt.Printf("timeout occurred after waiting %s for %s\n", dur, host)
+		os.Exit(1)
 	}
-	fmt.Printf("%s is available after %s\n", host, time.Since(startTime))
+	fmt.Printf("%s is available after %s\n", host, dur)
 }
 
-func waitForIt(addr *net.UDPAddr) error {
-	conn, err := net.DialUDP("udp", nil, addr)
+func waitForIt(addr *net.UDPAddr, timeout time.Duration) bool {
+	conn, err := net.ListenUDP("udp", nil)
 	if err != nil {
-		return err
+		log.Fatal("ListenUDP failed: %s", err)
 	}
-	if _, err := conn.Write(packet); err != nil {
-		return err
+	done := make(chan struct{})
+	go func() {
+		b := make([]byte, 1500)
+		n, err := conn.Read(b)
+		if err != nil {
+			log.Fatalf("Read failed: %s", err)
+			return
+		}
+		b = b[:n]
+		if len(b) < 5 {
+			log.Fatal("invalid packet")
+		}
+		if !bytes.Equal(b[1:5], []byte{0, 0, 0, 0}) {
+			log.Fatal("expected Version Negotiation packet")
+		}
+		close(done)
+	}()
+
+	ticker := time.NewTicker(time.Second / 2)
+	if timeout == 0 {
+		timeout = 365 * 24 * time.Hour
 	}
-	b := make([]byte, 1500)
-	n, err := conn.Read(b)
-	if err != nil {
-		return err
+	timer := time.NewTimer(timeout)
+	for {
+		if _, err := conn.WriteTo(packet, addr); err != nil {
+			log.Fatalf("Write failed: %s", err)
+			return false
+		}
+		select {
+		case <-ticker.C:
+		case <-timer.C:
+			return false
+		case <-done:
+			return true
+		}
 	}
-	b = b[:n]
-	if len(b) < 5 {
-		log.Fatal("invalid packet")
-	}
-	if !bytes.Equal(b[1:5], []byte{0, 0, 0, 0}) {
-		log.Fatal("expected Version Negotiation packet")
-	}
-	return nil
 }
