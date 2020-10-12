@@ -44,8 +44,10 @@ services:
         ipv4_address: 193.167.100.100
         ipv6_address: fd00:cafe:cafe:100::100
     extra_hosts:
-      - "${IP4_NAME_PREFIX}client:193.167.0.100"
-      - "${IP6_NAME_PREFIX}client:fd00:cafe:cafe:0::100"
+      - "client4:193.167.0.100"
+      - "client6:fd00:cafe:cafe:0::100"
+      - "client46:193.167.0.100"
+      - "client46:fd00:cafe:cafe:0::100"
 
   client:
     build: ./$CLIENT
@@ -68,8 +70,10 @@ services:
         ipv4_address: 193.167.0.100
         ipv6_address: fd00:cafe:cafe:0::100
     extra_hosts:
-      - "${IP4_NAME_PREFIX}server:193.167.100.100"
-      - "${IP6_NAME_PREFIX}server:fd00:cafe:cafe:100::100"
+      - "server4:193.167.100.100"
+      - "server6:fd00:cafe:cafe:100::100"
+      - "server46:193.167.100.100"
+      - "server46:fd00:cafe:cafe:100::100"
 
 networks:
   leftnet:
