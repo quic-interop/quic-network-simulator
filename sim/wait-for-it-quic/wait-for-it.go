@@ -65,10 +65,12 @@ func waitForIt(addr *net.UDPAddr, timeout time.Duration) bool {
 	}()
 
 	ticker := time.NewTicker(time.Second / 2)
-	if timeout == 0 {
-		timeout = 365 * 24 * time.Hour
+	var timerChan <-chan time.Time
+	if timeout > 0 {
+		timer := time.NewTimer(timeout)
+		defer timer.Stop()
+		timerChan = timer.C
 	}
-	timer := time.NewTimer(timeout)
 	for {
 		if _, err := conn.WriteTo(packet, addr); err != nil {
 			log.Fatalf("Write failed: %s", err)
@@ -76,7 +78,7 @@ func waitForIt(addr *net.UDPAddr, timeout time.Duration) bool {
 		}
 		select {
 		case <-ticker.C:
-		case <-timer.C:
+		case <-timerChan:
 			return false
 		case <-done:
 			return true
