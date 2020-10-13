@@ -45,10 +45,7 @@ int main(int argc, char *argv[]) {
     p2p.SetQueueSize(StringValue(queue + "p"));
     
     NetDeviceContainer devices = p2p.Install(sim.GetLeftNode(), sim.GetRightNode());
-    Ipv4AddressHelper ipv4;
-    ipv4.SetBase("193.167.50.0", "255.255.255.0");
-    Ipv4InterfaceContainer interfaces = ipv4.Assign(devices);
-    
+
     devices.Get(0)->SetAttribute("ReceiveErrorModel", PointerValue(client_drops));
     devices.Get(1)->SetAttribute("ReceiveErrorModel", PointerValue(server_drops));
     

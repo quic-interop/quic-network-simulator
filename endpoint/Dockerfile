@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 RUN apt-get update && \
-  apt-get install -y wget net-tools iputils-ping tcpdump ethtool iperf
+  apt-get install -y wget net-tools iputils-ping tcpdump ethtool iperf iproute2
 
 COPY setup.sh .
 RUN chmod +x setup.sh
