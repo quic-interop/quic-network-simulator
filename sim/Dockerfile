@@ -3,7 +3,7 @@ FROM ubuntu:20.04 AS builder
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y python3 build-essential cmake wget
 
-ENV VERS 3.31
+ENV VERS 3.32
 RUN wget https://www.nsnam.org/release/ns-allinone-$VERS.tar.bz2
 RUN tar xjf ns-allinone-$VERS.tar.bz2 && rm ns-allinone-$VERS.tar.bz2
 RUN mv /ns-allinone-$VERS/ns-$VERS /ns3
