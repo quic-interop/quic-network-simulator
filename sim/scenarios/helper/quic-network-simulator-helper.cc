@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 
 #include "ns3/core-module.h"
 #include "ns3/fd-net-device-module.h"
@@ -43,6 +45,23 @@ void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue 
   ipv6->SetUp(interface);
 }
 
+Mac48Address getMacAddress(std::string iface) {
+  unsigned char buf[6];
+  int fd = socket(AF_INET, SOCK_DGRAM, 0);
+  struct ifreq ifr;
+  ifr.ifr_addr.sa_family = AF_INET;
+  strncpy(ifr.ifr_name, iface.c_str(), IFNAMSIZ-1);
+  ioctl(fd, SIOCGIFHWADDR, &ifr);
+  for(unsigned int i=0; i<6; i++) {
+    buf[i] = ifr.ifr_hwaddr.sa_data[i];
+  }
+  ioctl(fd, SIOCGIFMTU, &ifr);
+  close(fd);
+  Mac48Address mac;
+  mac.CopyFrom(buf);
+  return mac;
+}
+
 QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
   GlobalValue::Bind("SimulatorImplementationType", StringValue("ns3::RealtimeSimulatorImpl"));
   GlobalValue::Bind("ChecksumEnabled", BooleanValue(true));
@@ -55,8 +74,8 @@ QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
   left_node_ = nodes.Get(0);
   right_node_ = nodes.Get(1);
 
-  installNetDevice(left_node_, "eth0", Mac48AddressValue("02:51:55:49:43:00"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:0::2", 64));
-  installNetDevice(right_node_, "eth1", Mac48AddressValue("02:51:55:49:43:01"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:100::2", 64));
+  installNetDevice(left_node_, "eth0", getMacAddress("eth0"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:0::2", 64));
+  installNetDevice(right_node_, "eth1", getMacAddress("eth1"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:100::2", 64));
 }
 
 void massageIpv6Routing(Ptr<Node> local, Ptr<Node> peer) {
