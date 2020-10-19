@@ -14,6 +14,11 @@ RUN mkdir out/
 RUN ./waf configure --build-profile=optimized --out=out/
 RUN ./waf build
 
+RUN cd / && \
+  wget https://dl.google.com/go/go1.15.linux-amd64.tar.gz && \
+  tar xfz go1.15.linux-amd64.tar.gz && \
+  rm go1.15.linux-amd64.tar.gz
+
 # make including of the QuicNetworkSimulatorHelper class possible
 COPY wscript.patch .
 RUN patch < wscript.patch
@@ -25,13 +30,6 @@ COPY scenarios scratch/
 RUN ./waf build  && \
   cd out/lib && du -sh . && strip -v * && du -sh . && cd ../.. && \
   cd out/scratch && rm -r subdir helper scratch-simulator*
-
-RUN cd / && \
-  wget https://dl.google.com/go/go1.15.linux-amd64.tar.gz && \
-  tar xfz go1.15.linux-amd64.tar.gz && \
-  rm go1.15.linux-amd64.tar.gz
-
-RUN ls -al /go
 
 ENV PATH="/go/bin:${PATH}"
 COPY wait-for-it-quic /wait-for-it-quic
