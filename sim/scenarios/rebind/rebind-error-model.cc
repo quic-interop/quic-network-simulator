@@ -46,6 +46,8 @@ void RebindErrorModel::DoRebind() {
 }
 
 bool RebindErrorModel::DoCorrupt(Ptr<Packet> p) {
+  if(!IsUDPPacket(p)) return false;
+
   QuicPacket qp = QuicPacket(p);
 
   const Ipv4Address &src_ip_in = qp.GetIpv4Header().GetSource();

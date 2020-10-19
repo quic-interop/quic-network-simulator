@@ -30,6 +30,8 @@ CorruptRateErrorModel::CorruptRateErrorModel()
 void CorruptRateErrorModel::DoReset(void) { }
 
 bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
+    if(!IsUDPPacket(p)) return false;
+
     QuicPacket qp = QuicPacket(p);
 
     if(distr(*rng) >= rate) {
