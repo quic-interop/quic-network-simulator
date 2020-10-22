@@ -35,6 +35,8 @@ ENV PATH="/go/bin:${PATH}"
 COPY wait-for-it-quic /wait-for-it-quic
 RUN cd /wait-for-it-quic && go build .
 
+RUN find /ns3/out/src/fd-net-device -ls
+
 FROM ubuntu:20.04
 
 RUN apt-get update && \
