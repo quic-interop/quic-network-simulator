@@ -22,6 +22,8 @@ DropRateErrorModel::DropRateErrorModel()
 void DropRateErrorModel::DoReset(void) { }
  
 bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p) {
+    if(!IsUDPPacket(p)) return false;
+
     QuicPacket qp = QuicPacket(p);
 
     if (distr(*rng) >= rate) {

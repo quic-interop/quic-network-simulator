@@ -12,6 +12,8 @@
 using namespace ns3;
 using namespace std;
 
+bool IsUDPPacket(Ptr<Packet> p);
+
 class QuicPacket {
 public:
     QuicPacket(Ptr<Packet> p);

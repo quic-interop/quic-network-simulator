@@ -1,3 +1,4 @@
+#include "../helper/quic-packet.h"
 #include "droplist-error-model.h"
 
 using namespace std;
@@ -18,9 +19,12 @@ DroplistErrorModel::DroplistErrorModel()
 void DroplistErrorModel::DoReset(void) { }
  
 bool DroplistErrorModel::DoCorrupt(Ptr<Packet> p) {
-    if(drops.find(++packet_num) == drops.end())
-        return false;
-    cout << "Dropping packet number " << packet_num << endl;
+    if(!IsUDPPacket(p)) return false;
+    if(drops.find(++packet_num) == drops.end()) return false;
+    
+    QuicPacket qp = QuicPacket(p);
+    cout << "Dropping packet " << packet_num << " (" << qp.GetUdpPayload().size() << " bytes) from " << qp.GetIpv4Header().GetSource() << endl;
+    qp.ReassemblePacket();
     return true;
 }
 
