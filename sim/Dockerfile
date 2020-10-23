@@ -11,7 +11,7 @@ RUN mv /ns-allinone-$VERS/ns-$VERS /ns3
 WORKDIR /ns3
 
 RUN mkdir out/
-RUN ./waf configure --build-profile=optimized --out=out/
+RUN ./waf configure --build-profile=release --out=out/
 RUN ./waf build
 
 RUN cd / && \
@@ -42,7 +42,7 @@ RUN apt-get update && \
   apt-get clean
 
 WORKDIR /ns3
-COPY --from=builder /ns3/out/src/fd-net-device/*optimized /ns3/out/src/fd-net-device/*debug /ns3/src/fd-net-device/
+COPY --from=builder /ns3/out/src/fd-net-device/* /ns3/src/fd-net-device/
 COPY --from=builder /ns3/out/scratch/*/* /ns3/scratch/
 COPY --from=builder /ns3/out/lib/ /ns3/lib
 COPY --from=builder /wait-for-it-quic/wait-for-it-quic /usr/bin
