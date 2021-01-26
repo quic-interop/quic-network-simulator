@@ -11,7 +11,7 @@ import (
 )
 
 // compose a packet that will elicit a Version Negotiation packet
-var packet = append([]byte{0xc0, 0x57, 0x41, 0x49, 0x54, 0, 0}, make([]byte, 1200)...)
+var packet = append([]byte{0xc0, 0x57, 0x41, 0x49, 0x54, 0x08, 0}, make([]byte, 1200)...)
 
 func main() {
 	startTime := time.Now()
