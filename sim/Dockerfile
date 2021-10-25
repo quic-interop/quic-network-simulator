@@ -37,9 +37,12 @@ RUN cd /wait-for-it-quic && go build .
 
 FROM ubuntu:20.04
 
-RUN apt-get update && \
-  apt-get install -y net-tools iptables && \
-  apt-get clean
+RUN    apt-get update \
+    && apt-get install -y \
+        net-tools \
+        iptables \
+        nftables \
+    && apt-get clean
 
 WORKDIR /ns3
 COPY --from=builder /ns3/out/src/fd-net-device/* /ns3/src/fd-net-device/
