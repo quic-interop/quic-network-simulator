@@ -11,20 +11,30 @@ ifconfig eth1 promisc
 # and a packet arriving at eth1 destined to 10.0.0.0/16 directly to eth0.
 # This would allow packets to skip the ns3 simulator altogether.
 # Drop those to make sure they actually take the path through ns3.
+FIREWALL_CONFIGURED=0
 if iptables -L 2> /dev/null | grep FORWARD > /dev/null; then
-    echo "Using iptables"
+    echo "Configuring iptables"
     iptables -A FORWARD -i eth0 -o eth1 -j DROP
     iptables -A FORWARD -i eth1 -o eth0 -j DROP
+    FIREWALL_CONFIGURED=1
+fi
+if ip6tables -L 2> /dev/null | grep FORWARD > /dev/null; then
+    echo "Configuring ip6tables"
     ip6tables -A FORWARD -i eth0 -o eth1 -j DROP
     ip6tables -A FORWARD -i eth1 -o eth0 -j DROP
-elif grep nf_tables /proc/modules > /dev/null ; then
-    echo "Using nftables"
+    FIREWALL_CONFIGURED=1
+fi
+if grep nf_tables /proc/modules > /dev/null ; then
+    echo "Configuring nftables"
     nft add table ip filter
     nft add chain ip filter FORWARD
     nft add rule ip filter FORWARD iifname "eth0" oifname "eth1" counter drop
     nft add rule ip filter FORWARD iifname "eth1" oifname "eth0" counter drop
-else
-    echo "Neither ip_tables nor nf_tables module is loaded. Skipping firewall configuration."
+    FIREWALL_CONFIGURED=1
+fi
+if [[ $FIREWALL_CONFIGURED != 1 ]]; then
+    echo "Could not configure firewall!"
+    exit 1
 fi
 
 if [[ -n "$WAITFORSERVER" ]]; then
