@@ -20,8 +20,11 @@ using namespace ns3;
 void onSignal(int signum) {
   std::cout << "Received signal: " << signum << std::endl;
   // see https://gitlab.com/nsnam/ns-3-dev/issues/102
-  Simulator::Stop();
-  NS_FATAL_ERROR(signum);
+  // schedule stop task in 60s. We will exit later, when no packets arrive until then.
+  Simulator::Stop(Time("60s"));
+  // Simulator::Stop(Time("1s"));
+  // Simulator::Stop();
+  // NS_FATAL_ERROR(signum);
 }
 
 void installNetDevice(Ptr<Node> node, std::string deviceName, Mac48AddressValue macAddress, Ipv4InterfaceAddress ipv4Address, Ipv6InterfaceAddress ipv6Address) {
