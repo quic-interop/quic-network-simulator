@@ -13,6 +13,7 @@ jobs:
       - name: Build endpoint
         uses: docker/build-push-action@v1
         with:
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'push' }}
           path: endpoint/
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -28,6 +29,7 @@ jobs:
       - name: Build simulator
         uses: docker/build-push-action@v1
         with:
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'push' }}
           path: sim/
           username: ${{ secrets.DOCKER_USERNAME }}
