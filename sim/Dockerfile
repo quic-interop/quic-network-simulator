@@ -1,5 +1,8 @@
 FROM ubuntu:20.04 AS builder
 
+ARG TARGETPLATFORM
+RUN echo "TARGETPLATFORM : $TARGETPLATFORM"
+
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y python3 build-essential cmake wget
 
@@ -13,6 +16,18 @@ WORKDIR /ns3
 RUN mkdir out/
 RUN ./waf configure --build-profile=release --out=out/
 RUN ./waf build
+
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then cd / && \
+      wget https://dl.google.com/go/go1.15.linux-amd64.tar.gz && \
+      tar xfz go1.15.linux-amd64.tar.gz && \
+      rm go1.15.linux-amd64.tar.gz; \
+    fi
+
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then cd / && \
+      wget https://dl.google.com/go/go1.15.linux-arm64.tar.gz && \
+      tar xfz go1.15.linux-arm64.tar.gz && \
+      rm go1.15.linux-arm64.tar.gz; \
+    fi
 
 RUN cd / && \
   wget https://dl.google.com/go/go1.15.linux-amd64.tar.gz && \
