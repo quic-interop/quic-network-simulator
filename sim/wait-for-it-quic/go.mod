@@ -1,3 +1,3 @@
 module github.com/marten-seemann/quic-network-simulator/sim/wait-for-it-quic
 
-go 1.15
+go 1.18

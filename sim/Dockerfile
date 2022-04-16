@@ -18,21 +18,21 @@ RUN ./waf configure --build-profile=release --out=out/
 RUN ./waf build
 
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then cd / && \
-      wget https://dl.google.com/go/go1.15.linux-amd64.tar.gz && \
-      tar xfz go1.15.linux-amd64.tar.gz && \
-      rm go1.15.linux-amd64.tar.gz; \
+      wget https://dl.google.com/go/go1.18.1.linux-amd64.tar.gz && \
+      tar xfz go1.18.1.linux-amd64.tar.gz && \
+      rm go1.18.1.linux-amd64.tar.gz; \
     fi
 
 RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then cd / && \
-      wget https://dl.google.com/go/go1.15.linux-arm64.tar.gz && \
-      tar xfz go1.15.linux-arm64.tar.gz && \
-      rm go1.15.linux-arm64.tar.gz; \
+      wget https://dl.google.com/go/go1.18.1.linux-arm64.tar.gz && \
+      tar xfz go1.18.1.linux-arm64.tar.gz && \
+      rm go1.18.1.linux-arm64.tar.gz; \
     fi
 
 RUN cd / && \
-  wget https://dl.google.com/go/go1.15.linux-amd64.tar.gz && \
-  tar xfz go1.15.linux-amd64.tar.gz && \
-  rm go1.15.linux-amd64.tar.gz
+  wget https://dl.google.com/go/go1.18.1.linux-amd64.tar.gz && \
+  tar xfz go1.18.1.linux-amd64.tar.gz && \
+  rm go1.18.1.linux-amd64.tar.gz
 
 # make including of the QuicNetworkSimulatorHelper class possible
 COPY wscript.patch .
