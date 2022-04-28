@@ -24,7 +24,7 @@ class DropRateErrorModel : public ErrorModel {
     bool first_packet_logged;
     static constexpr unsigned int LOG_AFTER_PACKETS = 1000;
 
-    bool DoCorrupt (Ptr<Packet> p);
+    bool DoCorrupt(Ptr<Packet> p);
     void DoReset(void);
 
     void log(void);

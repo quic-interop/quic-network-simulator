@@ -1,22 +1,24 @@
 #include "../helper/quic-packet.h"
-#include "drop-rate-error-model.h"
+#include "gilbert-elliott-drop-model.h"
 
 using namespace std;
 
-NS_OBJECT_ENSURE_REGISTERED(DropRateErrorModel);
+NS_OBJECT_ENSURE_REGISTERED(GilbertElliottDropModel);
 
-TypeId DropRateErrorModel::GetTypeId(void) {
-    static TypeId tid = TypeId("DropRateErrorModel")
+TypeId GilbertElliottDropModel::GetTypeId(void) {
+    static TypeId tid = TypeId("GilbertElliottDropModel")
         .SetParent<ErrorModel>()
-        .AddConstructor<DropRateErrorModel>()
+        .AddConstructor<GilbertElliottDropModel>()
         ;
     return tid;
 }
 
-DropRateErrorModel::DropRateErrorModel()
+GilbertElliottDropModel::GilbertElliottDropModel()
     :
-        rate(0),
-        distr(0, 99),
+        goodBadPerc(0),
+        badGoodPerc(0),
+        state(GilbertElliottState::GOOD),
+        distr(0.0, 1.0),
         drop_counter(0),
         pass_counter(0),
         first_packet_logged(false)
@@ -25,9 +27,9 @@ DropRateErrorModel::DropRateErrorModel()
     rng = new std::mt19937(rd());
 }
 
-void DropRateErrorModel::DoReset(void) { }
+void GilbertElliottDropModel::DoReset(void) { }
 
-void DropRateErrorModel::log(void) {
+void GilbertElliottDropModel::log(void) {
     if (!first_packet_logged) {
         if (pass_counter > 0) {
             cout << "First packet forwarded." << endl;
@@ -50,31 +52,35 @@ void DropRateErrorModel::log(void) {
     }
 }
 
-bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p) {
+bool GilbertElliottDropModel::DoCorrupt(Ptr<Packet> p) {
     if (!IsUDPPacket(p)) {
         return false;
     }
 
     QuicPacket qp = QuicPacket(p);
 
-    if (distr(*rng) >= rate) {
-        // cout << "Forwarding packet (" << qp.GetUdpPayload().size() << " bytes) from " << qp.GetIpv4Header().GetSource() << endl;
-        // if (rate > 0) {
-        pass_counter += 1;
-        log();
-        // }
-        qp.ReassemblePacket();
-        return false;
+    // check if we switch the state:
+    float rnd = distr(*rng);
+    if (this->state == GilbertElliottState::GOOD && rnd < this->goodBadPerc) {
+        state = GilbertElliottState::BAD;
+    } else if (this->state == GilbertElliottState::BAD && rnd < this->badGoodPerc) {
+        state = GilbertElliottState::GOOD;
     }
 
-    // cout << "Dropping packet (" << qp.GetUdpPayload().size() << " bytes) from " << qp.GetIpv4Header().GetSource() << endl;
-    // if (rate > 0) {
-    drop_counter += 1;
-    log();
-    // }
-    return true;
+    if (this->state == GilbertElliottState::GOOD) {
+        pass_counter += 1;
+        log();
+        qp.ReassemblePacket();
+        return false;
+    } else {
+        drop_counter += 1;
+        log();
+        return true;
+    }
+
 }
 
-void DropRateErrorModel::SetDropRate(int rate_in) {
-    rate = rate_in;
+void GilbertElliottDropModel::SetProbabilities(float goodBadPerc, float badGoodPerc) {
+    this->goodBadPerc = goodBadPerc;
+    this->badGoodPerc = badGoodPerc;
 }
