@@ -17,17 +17,13 @@ RUN mkdir out/
 RUN ./waf configure --build-profile=release --out=out/
 RUN ./waf build
 
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then cd / && \
-      wget https://dl.google.com/go/go1.15.linux-amd64.tar.gz && \
-      tar xfz go1.15.linux-amd64.tar.gz && \
-      rm go1.15.linux-amd64.tar.gz; \
-    fi
+ENV GOVERSION=1.15
 
-RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then cd / && \
-      wget https://dl.google.com/go/go1.15.linux-arm64.tar.gz && \
-      tar xfz go1.15.linux-arm64.tar.gz && \
-      rm go1.15.linux-arm64.tar.gz; \
-    fi
+RUN platform=$(echo ${TARGETPLATFORM} | tr '/' '-') && \
+  filename="go${GOVERSION}.${platform}.tar.gz" && \
+  wget https://dl.google.com/go/${filename} && \
+  tar xfz ${filename} && \
+  rm ${filename}
 
 # make including of the QuicNetworkSimulatorHelper class possible
 COPY wscript.patch .
