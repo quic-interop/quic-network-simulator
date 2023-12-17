@@ -1,0 +1,11 @@
+--- CMakeLists.txt.orig
++++ CMakeLists.txt
+@@ -146,7 +146,7 @@ if(${ENABLE_FDNETDEV})
+     )
+
+     add_definitions(
+-      -DRAW_SOCK_CREATOR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/src/fd-net-device/ns${NS3_VER}-raw-sock-creator${build_profile_suffix}"
++      -DRAW_SOCK_CREATOR="raw-sock-creator${build_profile_suffix}"
+     )
+     build_exec(
+       EXECNAME raw-sock-creator
