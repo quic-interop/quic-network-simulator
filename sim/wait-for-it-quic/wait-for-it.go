@@ -10,8 +10,14 @@ import (
 	"time"
 )
 
-// compose a packet that will elicit a Version Negotiation packet
-var packet = append([]byte{0xc0, 0x57, 0x41, 0x49, 0x54, 0, 0}, make([]byte, 1200)...)
+// Initial packets that will elicit a Version Negotiation packet
+//
+// A server compliant with the QUIC protocol is expected to respond with a Version
+// Negotiation message upon receiving any of the following messages.
+var packets = [][]byte {
+	append([]byte{0xc0, 0x57, 0x41, 0x49, 0x54, 0, 0}, make([]byte, 1200)...),
+	append([]byte{0xc0, 0x57, 0x41, 0x49, 0x54, 0x08, 0, 0}, make([]byte, 1200)...),
+}
 
 func main() {
 	startTime := time.Now()
@@ -71,7 +77,10 @@ func waitForIt(addr *net.UDPAddr, timeout time.Duration) bool {
 		defer timer.Stop()
 		timerChan = timer.C
 	}
+	i := 0;
 	for {
+		packet := packets[i % len(packets)];
+		i += 1;
 		if _, err := conn.WriteTo(packet, addr); err != nil {
 			log.Fatalf("Write failed: %s", err)
 			return false
