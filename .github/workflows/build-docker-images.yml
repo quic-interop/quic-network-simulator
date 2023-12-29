@@ -9,7 +9,7 @@ jobs:
   endpoint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up QEMU
         id: qemu
@@ -38,7 +38,7 @@ jobs:
   simulator:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up QEMU
         id: qemu
