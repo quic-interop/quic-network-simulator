@@ -1,43 +1,51 @@
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:20.04 AS builder
 
-ARG TARGETARCH
-RUN echo "TARGETARCH : $TARGETARCH"
+ARG TARGETPLATFORM
+RUN echo "TARGETPLATFORM : $TARGETPLATFORM"
 
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y python3 build-essential cmake wget
 
-ENV NS_VERS 3.40
-RUN wget -O ns3.tar.bz2 https://www.nsnam.org/release/ns-allinone-$NS_VERS.tar.bz2
-RUN tar xjf ns3.tar.bz2 && rm ns3.tar.bz2
-RUN mv /ns-allinone-$NS_VERS/ns-$NS_VERS /ns3
-
-ENV GO_VERS 1.21.5
-RUN wget -O go.tar.gz https://dl.google.com/go/go$GO_VERS.linux-$TARGETARCH.tar.gz
-RUN tar xfz go.tar.gz && rm go.tar.gz
+ENV VERS 3.32
+RUN wget https://www.nsnam.org/release/ns-allinone-$VERS.tar.bz2
+RUN tar xjf ns-allinone-$VERS.tar.bz2 && rm ns-allinone-$VERS.tar.bz2
+RUN mv /ns-allinone-$VERS/ns-$VERS /ns3
 
 WORKDIR /ns3
 
 RUN mkdir out/
-RUN ./ns3 configure --build-profile=release --out=out/
-RUN ./ns3 build
+RUN ./waf configure --build-profile=release --out=out/
+RUN ./waf build
+
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then cd / && \
+      wget https://dl.google.com/go/go1.15.linux-amd64.tar.gz && \
+      tar xfz go1.15.linux-amd64.tar.gz && \
+      rm go1.15.linux-amd64.tar.gz; \
+    fi
+
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then cd / && \
+      wget https://dl.google.com/go/go1.15.linux-arm64.tar.gz && \
+      tar xfz go1.15.linux-arm64.tar.gz && \
+      rm go1.15.linux-arm64.tar.gz; \
+    fi
 
 # make including of the QuicNetworkSimulatorHelper class possible
-COPY CMakeLists.patch .
-RUN patch -d scratch < CMakeLists.patch
+COPY wscript.patch .
+RUN patch < wscript.patch
 
 RUN rm -r scratch/subdir scratch/scratch-simulator.cc
 COPY scenarios scratch/
 
 # compile all the scenarios
-RUN ./ns3 build  && \
+RUN ./waf build  && \
   cd out/lib && du -sh . && strip -v * && du -sh . && cd ../.. && \
-  cd out/scratch && rm -r subdir ns$NS_VERS-scratch-simulator*
+  cd out/scratch && rm -r subdir helper scratch-simulator*
 
 ENV PATH="/go/bin:${PATH}"
 COPY wait-for-it-quic /wait-for-it-quic
 RUN cd /wait-for-it-quic && go build .
 
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 
 RUN apt-get update && \
   apt-get install -y net-tools iptables && \
