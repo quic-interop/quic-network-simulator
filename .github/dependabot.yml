@@ -4,7 +4,11 @@
 version: 2
 updates:
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/endpoint"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "/sim"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
