@@ -1,11 +1,26 @@
---- /Users/lars/Downloads/CMakeLists.txt	2023-12-21 15:49:55
-+++ CMakeLists.txt	2023-12-21 16:00:19
-@@ -105,7 +105,7 @@
-   else()
-     # Otherwise we pick all the files in the subdirectory
-     # and create a scratch for them automatically
--    file(GLOB scratch_sources CONFIGURE_DEPENDS ${subdir}/[^.]*.cc)
-+    file(GLOB scratch_sources CONFIGURE_DEPENDS ${subdir}/[^.]*.cc helper/[^.]*.cc)
-     create_scratch("${scratch_sources}")
+diff --git a/scratch/CMakeLists.txt b/scratch/CMakeLists.txt
+index adeeb2cf8..6e23f81b6 100644
+--- a/scratch/CMakeLists.txt
++++ b/scratch/CMakeLists.txt
+@@ -58,6 +58,11 @@ function(create_scratch source_files)
+     set(target_prefix scratch${scratch_dirname}_)
+   endif()
+ 
++  # Link our scratches against the helper files
++  get_filename_component(scratch_dirname ${scratch_src} DIRECTORY)
++  file(GLOB helper_files CONFIGURE_DEPENDS ${scratch_dirname}/../helper/*)
++  list(APPEND source_files ${helper_files})
++
+   # Get source absolute path and transform into relative path
+   get_filename_component(scratch_src ${scratch_src} ABSOLUTE)
+   get_filename_component(scratch_absolute_directory ${scratch_src} DIRECTORY)
+@@ -88,7 +93,8 @@ file(
+ )
+ # Filter out files
+ foreach(entry ${scratch_subdirectories})
+-  if(NOT (IS_DIRECTORY ${entry}))
++  # Don't treat our helper directory as a scratch
++  if(NOT (IS_DIRECTORY ${entry}) OR ${entry} MATCHES ".*/helper")
+     list(REMOVE_ITEM scratch_subdirectories ${entry})
    endif()
  endforeach()
