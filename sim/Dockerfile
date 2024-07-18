@@ -9,7 +9,7 @@ RUN apt-get update && \
   libsqlite3-dev golang-go
 
 ENV NS_VERS 3.42
-ADD --checksum=sha256:ce6a2c6a91d6979999da0a889cf0aa5db8798f387edf20672af9bcd966277aa9 \
+ADD --checksum=sha256:90600b3fb73b00f477c8b82c04639b1fd79b8a1cfd3c46236e3c9a3c8d3bcb62 \
   https://www.nsnam.org/release/ns-allinone-$NS_VERS.tar.bz2 ns3.tar.bz2
 RUN tar xjf ns3.tar.bz2 && rm ns3.tar.bz2
 RUN mv /ns-allinone-$NS_VERS/ns-$NS_VERS /ns3
