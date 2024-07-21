@@ -27,13 +27,18 @@ COPY scenarios scratch/
 # compile all the scenarios
 RUN ./ns3 build
 
+# strip ns3 version prefix from scratches
+RUN find out/scratch -name "ns${NS_VERS}-*" | \
+    sed -e 'p' -E -e "s|ns${NS_VERS}-*||g" | \
+    xargs -n2 mv
+
 COPY wait-for-it-quic /wait-for-it-quic
 RUN cd /wait-for-it-quic && go build .
 
 FROM ubuntu:24.04
 
 RUN apt-get update && \
-  apt-get install -y net-tools iptables && \
+  apt-get install -y net-tools iptables libgsl-dev libxml2 libsqlite3-0 && \
   apt-get clean
 
 WORKDIR /ns3
