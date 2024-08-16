@@ -22,6 +22,8 @@ fi
 
 echo "Using scenario:" $SCENARIO
 
+tcpdump -i eth0 -U -w "/logs/tcpdump_left.pcap" udp &
+tcpdump -i eth1 -U -w "/logs/tcpdump_right.pcap" udp &
 eval ./scratch/"$SCENARIO &"
 
 PID=`jobs -p`
