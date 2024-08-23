@@ -11,7 +11,6 @@ class DropRateErrorModel : public ErrorModel {
  public:
     static TypeId GetTypeId(void);
     DropRateErrorModel();
-    virtual ~DropRateErrorModel();
     void SetDropRate(int perc);
     void SetMaxDropBurst(int burst);
 

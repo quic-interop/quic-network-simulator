@@ -1,3 +1,5 @@
+#include <iomanip>
+
 #include "drop-rate-error-model.h"
 #include "../helper/quic-packet.h"
 
@@ -11,13 +13,6 @@ TypeId DropRateErrorModel::GetTypeId(void) {
         .AddConstructor<DropRateErrorModel>()
         ;
     return tid;
-}
-
-DropRateErrorModel::~DropRateErrorModel() {
-    cout << "Dropped " << dropped << " packets, forwarded " << forwarded
-         << " packets (" << (double)dropped / (dropped + forwarded) * 100
-         << "%)." << endl
-         << flush;
 }
 
 DropRateErrorModel::DropRateErrorModel()
@@ -39,7 +34,7 @@ bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p)
     if (dropped_in_a_row >= burst) {
         dropped_in_a_row = 0;
         shouldDrop = false;
-    } else if (std::rand() % 100 < rate) {
+    } else if (std::rand() % 100 <= rate) {
         dropped_in_a_row++;
         shouldDrop = true;
     } else {
@@ -50,23 +45,23 @@ bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p)
     QuicPacket qp = QuicPacket(p);
 
     if (shouldDrop) {
-        cout << "Dropping packet (" << qp.GetUdpPayload().size()
-             << " bytes) from " << qp.GetIpv4Header().GetSource() << ":"
-             << qp.GetUdpHeader().GetSourcePort() << " to "
-             << qp.GetIpv4Header().GetDestination() << ":"
-             << qp.GetUdpHeader().GetDestinationPort() << endl
-             << flush;
+        cout << "Dropping ";
         dropped++;
     } else {
-        cout << "Forwarding packet (" << qp.GetUdpPayload().size()
-             << " bytes) from " << qp.GetIpv4Header().GetSource() << ":"
-             << qp.GetUdpHeader().GetSourcePort() << " to "
-             << qp.GetIpv4Header().GetDestination() << ":"
-             << qp.GetUdpHeader().GetDestinationPort() << endl
-             << flush;
+        cout << "Forwarding ";
         forwarded++;
         qp.ReassemblePacket();
     }
+    cout << qp.GetUdpPayload().size()
+         << " bytes " << qp.GetIpv4Header().GetSource() << ":"
+         << qp.GetUdpHeader().GetSourcePort() << " -> "
+         << qp.GetIpv4Header().GetDestination() << ":"
+         << qp.GetUdpHeader().GetDestinationPort()
+         << ", dropped " << dropped << "/" << dropped + forwarded << " ("
+         << fixed << setprecision(1)
+         << (double)dropped / (dropped + forwarded) * 100
+         << "%)" << endl;
+
     return shouldDrop;
 }
 
