@@ -5,30 +5,24 @@ using namespace std;
 
 NS_OBJECT_ENSURE_REGISTERED(DropRateErrorModel);
 
-TypeId DropRateErrorModel::GetTypeId(void)
-{
+TypeId DropRateErrorModel::GetTypeId(void) {
     static TypeId tid = TypeId("DropRateErrorModel")
-                            .SetParent<ErrorModel>()
-                            .AddConstructor<DropRateErrorModel>();
+        .SetParent<ErrorModel>()
+        .AddConstructor<DropRateErrorModel>()
+        ;
     return tid;
 }
 
-DropRateErrorModel::DropRateErrorModel()
-{
-    rate = 0;
-    burst = 0;
-    dropped_in_a_row = 0;
-    dropped = 0;
-    forwarded = 0;
-}
-
-DropRateErrorModel::~DropRateErrorModel()
-{
+DropRateErrorModel::~DropRateErrorModel() {
     cout << "Dropped " << dropped << " packets, forwarded " << forwarded
          << " packets (" << (double)dropped / (dropped + forwarded) * 100
          << "%)." << endl
          << flush;
 }
+
+DropRateErrorModel::DropRateErrorModel()
+    : rate(0), burst(0), dropped_in_a_row(0), dropped(0), forwarded(0)
+{}
 
 void DropRateErrorModel::DoReset(void)
 {
@@ -39,8 +33,7 @@ void DropRateErrorModel::DoReset(void)
 
 bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p)
 {
-    if (!IsUDPPacket(p))
-        return false;
+    if(!IsUDPPacket(p)) return false;
 
     bool shouldDrop = false;
     if (dropped_in_a_row >= burst) {
@@ -77,12 +70,10 @@ bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p)
     return shouldDrop;
 }
 
-void DropRateErrorModel::SetDropRate(int rate_in)
-{
+void DropRateErrorModel::SetDropRate(int rate_in) {
     rate = rate_in;
 }
 
-void DropRateErrorModel::SetMaxDropBurst(int burst_in)
-{
+void DropRateErrorModel::SetMaxDropBurst(int burst_in) {
     burst = burst_in;
 }

@@ -1,8 +1,6 @@
 #ifndef DROPRATE_ERROR_MODEL_H
 #define DROPRATE_ERROR_MODEL_H
 
-#include <set>
-#include <random>
 #include "ns3/error-model.h"
 
 using namespace ns3;
