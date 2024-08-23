@@ -3,7 +3,7 @@
 This scenario uses a bottleneck link similar to the [simple-p2p](../simple-p2p)
 scenario and optionally allows configuring the link to drop packets in either
 direction. Packets to be dropped are chosen randomly in both directions, based
-on rates specified by the user.
+on rates specified by the user, but no more than a given number of packets are dropped in a row.
 
 This scenario has the following configurable properties:
 
@@ -21,9 +21,14 @@ This scenario has the following configurable properties:
   (in percentage) in the server to client direction. This is a required
   parameter. For example, `--rate_to_client=10`.
 
+* `--burst_to_client`: The maximum number of packets that will be dropped in a row in the server to client direction. This is a required
+  parameter. For example, `--burst_to_client=3`.
+
 * `--rate_to_server`: Same as `rate_to_client` but in the other direction.
+
+* `--burst_to_server`: Same as `burst_to_client` but in the other direction.
 
 For example,
 ```bash
-./run.sh "drop-rate --delay=15ms --bandwidth=10Mbps --queue=25 --rate_to_client=10 --rate_to_server=20"
+./run.sh "drop-rate --delay=15ms --bandwidth=10Mbps --queue=25 --rate_to_client=10 --rate_to_server=20 --burst_to_client=3 --burst_to_server=3"
 ```
