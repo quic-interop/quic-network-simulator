@@ -23,7 +23,7 @@ This scenario has the following configurable properties:
   parameter. For example, `--rate_to_client=10`.
 
 * `--burst_to_client`: The maximum number of packets that will be dropped in a
-  row in the server to client direction. This is a required parameter. For
+  row in the server to client direction. This is an optional parameter. For
   example, `--burst_to_client=3`.
 
 * `--rate_to_server`: Same as `rate_to_client` but in the other direction.

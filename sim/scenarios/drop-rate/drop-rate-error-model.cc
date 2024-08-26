@@ -1,7 +1,7 @@
 #include <iomanip>
 
-#include "drop-rate-error-model.h"
 #include "../helper/quic-packet.h"
+#include "drop-rate-error-model.h"
 
 using namespace std;
 
@@ -16,25 +16,26 @@ TypeId DropRateErrorModel::GetTypeId(void) {
 }
 
 DropRateErrorModel::DropRateErrorModel()
-    : rate(0), burst(0), dropped_in_a_row(0), dropped(0), forwarded(0)
-{}
-
-void DropRateErrorModel::DoReset(void)
+    : rate(0), distr(0, 99), burst(INT_MAX), dropped_in_a_row(0), dropped(0), forwarded(0)
 {
+    std::random_device rd;
+    rng = new std::mt19937(rd());
+}
+
+void DropRateErrorModel::DoReset(void) {
     dropped_in_a_row = 0;
     dropped = 0;
     forwarded = 0;
 }
-
-bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p)
-{
+ 
+bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p) {
     if(!IsUDPPacket(p)) return false;
 
     bool shouldDrop = false;
     if (dropped_in_a_row >= burst) {
         dropped_in_a_row = 0;
         shouldDrop = false;
-    } else if (std::rand() % 100 <= rate) {
+    } else if (distr(*rng) < rate) {
         dropped_in_a_row++;
         shouldDrop = true;
     } else {
