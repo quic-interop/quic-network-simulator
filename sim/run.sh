@@ -17,15 +17,15 @@ ip6tables -A FORWARD -i eth0 -o eth1 -j DROP
 ip6tables -A FORWARD -i eth1 -o eth0 -j DROP
 
 if [[ -n "$WAITFORSERVER" ]]; then
-  wait-for-it-quic -t 10s $WAITFORSERVER
+  wait-for-it-quic -t 10s "$WAITFORSERVER"
 fi
 
-echo "Using scenario:" $SCENARIO
+echo "Using scenario: $SCENARIO"
 
 eval ./scratch/"$SCENARIO &"
 
-PID=`jobs -p`
-trap "kill -SIGINT $PID" INT
-trap "kill -SIGTERM $PID" TERM
-trap "kill -SIGKILL $PID" KILL
+PID=$(jobs -p)
+trap 'kill -SIGINT $PID' INT
+trap 'kill -SIGTERM $PID' TERM
+# SC2173: SIGKILL/SIGSTOP can not be trapped.
 wait
