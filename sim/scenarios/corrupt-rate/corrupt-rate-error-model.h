@@ -15,8 +15,8 @@ class CorruptRateErrorModel : public RateErrorModel {
     CorruptRateErrorModel();
     void SetCorruptRate(int perc);
     void SetMaxCorruptBurst(int burst);
-
-  private:
+    
+ private:
     int rate;
     std::mt19937 *rng;
     std::uniform_int_distribution<> distr;

@@ -3,40 +3,35 @@
 #include <cstdint>
 #include <vector>
 
-#include "../helper/quic-packet.h"
 #include "corrupt-rate-error-model.h"
+#include "../helper/quic-packet.h"
 
 using namespace std;
 
 NS_OBJECT_ENSURE_REGISTERED(CorruptRateErrorModel);
 
-TypeId CorruptRateErrorModel::GetTypeId(void)
-{
+TypeId CorruptRateErrorModel::GetTypeId(void) {
     static TypeId tid = TypeId("CorruptRateErrorModel")
-                            .SetParent<ErrorModel>()
-                            .AddConstructor<CorruptRateErrorModel>();
+        .SetParent<ErrorModel>()
+        .AddConstructor<CorruptRateErrorModel>()
+        ;
     return tid;
 }
 
 CorruptRateErrorModel::CorruptRateErrorModel()
-    : rate(0), distr(0, 99), burst(INT_MAX), corrupted_in_a_row(0),
-      corrupted(0), forwarded(0)
-{
+    : rate(0), distr(0, 99), burst(INT_MAX), corrupted_in_a_row(0), corrupted(0), forwarded(0) {
     std::random_device rd;
     rng = new std::mt19937(rd());
 }
 
-void CorruptRateErrorModel::DoReset(void)
-{
+void CorruptRateErrorModel::DoReset(void) {
     corrupted_in_a_row = 0;
     corrupted = 0;
     forwarded = 0;
 }
 
-bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p)
-{
-    if (!IsUDPPacket(p))
-        return false;
+bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
+    if(!IsUDPPacket(p)) return false;
 
     QuicPacket qp = QuicPacket(p);
 
@@ -60,27 +55,26 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p)
         shouldCorrupt = false;
     }
 
+    int pos = 0;
+    uint8_t old_n = 0;
+    uint8_t new_n = 0;
     if (shouldCorrupt) {
         cout << "Corrupting ";
         corrupted++;
 
         // Corrupt a byte in the 50 bytes of the UDP payload.
-        // This way, we will frequenetly hit the QUIC header.
-        std::uniform_int_distribution<> d(0,
-                                          min(uint32_t(50), p->GetSize() - 1));
-        int pos = d(*rng);
+        // This way, we will frequently hit the QUIC header.
+        std::uniform_int_distribution<> d(0, min(uint32_t(50), p->GetSize() - 1));
+        pos = d(*rng);
         vector<uint8_t> & payload = qp.GetUdpPayload();
         // Replace the byte at position pos with a random value.
         while (true) {
             uint8_t n = std::uniform_int_distribution<>(0, 255)(*rng);
             if (payload[pos] == n)
                 continue;
-            cout << "Corrupted packet (" << qp.GetUdpPayload().size()
-                 << " bytes) from " << qp.GetIpv4Header().GetSource()
-                 << " at offset " << pos << " (0x" << std::hex
-                 << (unsigned int)payload[pos] << " -> 0x" << (unsigned int)n
-                 << ")" << std::dec << endl;
+            old_n = payload[pos];
             payload[pos] = n;
+            new_n = payload[pos];
             break;
         }
         qp.ReassemblePacket();
@@ -89,11 +83,16 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p)
         forwarded++;
         qp.ReassemblePacket();
     }
+
     cout << qp.GetUdpPayload().size() << " bytes "
          << qp.GetIpv4Header().GetSource() << ":"
          << qp.GetUdpHeader().GetSourcePort() << " -> "
-         << qp.GetIpv4Header().GetDestination() << ":"
-         << qp.GetUdpHeader().GetDestinationPort() << ", corrupted "
+         << qp.GetIpv4Header().GetDestination() << ":";
+    if (pos != 0)
+        cout << " at offset " << pos << " (0x" << std::hex
+             << (unsigned int)old_n << " -> 0x" << (unsigned int)new_n
+             << ")" << std::dec;
+    cout << qp.GetUdpHeader().GetDestinationPort() << ", corrupted "
          << corrupted << "/" << corrupted + forwarded << " (" << fixed
          << setprecision(1) << (double)corrupted / (corrupted + forwarded) * 100
          << "%)" << endl;
@@ -101,7 +100,6 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p)
     return shouldCorrupt;
 }
 
-void CorruptRateErrorModel::SetCorruptRate(int rate_in)
-{
+void CorruptRateErrorModel::SetCorruptRate(int rate_in) {
     rate = rate_in;
 }
