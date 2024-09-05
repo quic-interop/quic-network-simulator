@@ -87,12 +87,13 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
     cout << qp.GetUdpPayload().size() << " bytes "
          << qp.GetIpv4Header().GetSource() << ":"
          << qp.GetUdpHeader().GetSourcePort() << " -> "
-         << qp.GetIpv4Header().GetDestination() << ":";
+         << qp.GetIpv4Header().GetDestination() << ":"
+         << qp.GetUdpHeader().GetDestinationPort();
     if (pos != 0)
-        cout << " at offset " << pos << " (0x" << std::hex
+        cout <<  " offset " << pos << " 0x" << std::hex
              << (unsigned int)old_n << " -> 0x" << (unsigned int)new_n
-             << ")" << std::dec;
-    cout << qp.GetUdpHeader().GetDestinationPort() << ", corrupted "
+             << std::dec;
+    cout << ", corrupted "
          << corrupted << "/" << corrupted + forwarded << " (" << fixed
          << setprecision(1) << (double)corrupted / (corrupted + forwarded) * 100
          << "%)" << endl;
