@@ -3,7 +3,8 @@
 This scenario uses a bottleneck link similar to the [simple-p2p](../simple-p2p)
 scenario and optionally allows configuring the link to corrupt packets in either
 direction. Packets to be corrupted are chosen randomly in both directions, based
-on rates specified by the user.
+on rates specified by the user, but no more than a given number of packets are
+corrupted in a row.
 
 This scenario has the following configurable properties:
 
@@ -21,9 +22,15 @@ This scenario has the following configurable properties:
   rate (in percentage) in the server to client direction. This is a required
   parameter. For example, `--rate_to_client=10`.
 
+* `--burst_to_client`: The maximum number of packets that will be corrupyed in a
+  row in the server to client direction. This is an optional parameter. For
+  example, `--burst_to_client=3`.
+
 * `--rate_to_server`: Same as `rate_to_client` but in the other direction.
+
+* `--burst_to_server`: Same as `burst_to_client` but in the other direction.
 
 For example,
 ```bash
-./run.sh "corrupt-rate --delay=15ms --bandwidth=10Mbps --queue=25 --rate_to_client=10 --rate_to_server=20"
+./run.sh "corrupt-rate --delay=15ms --bandwidth=10Mbps --queue=25 --rate_to_client=10 --rate_to_server=20 --burst_to_client=3 --burst_to_server=3"
 ```
