@@ -38,7 +38,7 @@ RUN cd /wait-for-it-quic && go build .
 FROM ubuntu:24.04
 
 RUN apt-get update && \
-  apt-get install -y net-tools iptables libgsl-dev libxml2 libsqlite3-0 && \
+  apt-get install -y net-tools iptables libgsl-dev libxml2 libsqlite3-0 tcpdump && \
   apt-get clean
 
 WORKDIR /ns3
