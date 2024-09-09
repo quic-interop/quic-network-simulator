@@ -22,7 +22,7 @@ This scenario has the following configurable properties:
   rate (in percentage) in the server to client direction. This is a required
   parameter. For example, `--rate_to_client=10`.
 
-* `--burst_to_client`: The maximum number of packets that will be corrupyed in a
+* `--burst_to_client`: The maximum number of packets that will be corrupted in a
   row in the server to client direction. This is an optional parameter. For
   example, `--burst_to_client=3`.
 
