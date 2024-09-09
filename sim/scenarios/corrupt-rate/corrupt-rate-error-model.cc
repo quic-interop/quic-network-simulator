@@ -77,12 +77,11 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
             new_n = payload[pos];
             break;
         }
-        qp.ReassemblePacket();
     } else {
         cout << "Forwarding ";
         forwarded++;
-        qp.ReassemblePacket();
     }
+    qp.ReassemblePacket();
 
     cout << qp.GetUdpPayload().size() << " bytes "
          << qp.GetIpv4Header().GetSource() << ":"
