@@ -44,7 +44,7 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
         // offered.
         corrupted_in_a_row = 0;
         shouldCorrupt = false;
-    } else if (corrupted_in_a_row > burst) {
+    } else if (corrupted_in_a_row >= burst) {
         corrupted_in_a_row = 0;
         shouldCorrupt = false;
     } else if (distr(*rng) < rate) {

@@ -32,7 +32,7 @@ bool DropRateErrorModel::DoCorrupt(Ptr<Packet> p) {
     if(!IsUDPPacket(p)) return false;
 
     bool shouldDrop = false;
-    if (dropped_in_a_row > burst) {
+    if (dropped_in_a_row >= burst) {
         dropped_in_a_row = 0;
         shouldDrop = false;
     } else if (distr(*rng) < rate) {
