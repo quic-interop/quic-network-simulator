@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
         client_corrupts->SetMaxCorruptBurst(stoi(client_burst));
     server_Corrupts->SetCorruptRate(stoi(server_rate));
     if (server_burst.length() > 0)
-        server_corrupts->SetMaxDropBurst(stoi(server_burst));
+        server_corrupts->SetMaxCorruptBurst(stoi(server_burst));
 
     QuicNetworkSimulatorHelper sim;
 
