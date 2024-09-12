@@ -12,7 +12,8 @@ using namespace std;
 NS_LOG_COMPONENT_DEFINE("ns3 simulator");
 
 int main(int argc, char *argv[]) {
-    std::string delay, bandwidth, queue, client_rate, server_rate;
+    std::string delay, bandwidth, queue, client_rate, server_rate,
+        client_burst, server_burst;
     std::random_device rand_dev;
     std::mt19937 generator(rand_dev());  // Seed random number generator first
     Ptr<CorruptRateErrorModel> client_corrupts = CreateObject<CorruptRateErrorModel>();
@@ -24,6 +25,12 @@ int main(int argc, char *argv[]) {
     cmd.AddValue("queue", "queue size of the p2p link (in packets)", queue);
     cmd.AddValue("rate_to_client", "packet corruption rate (towards client)", client_rate);
     cmd.AddValue("rate_to_server", "packet corruption rate (towards server)", server_rate);
+    cmd.AddValue("burst_to_client",
+                 "max. packet corruption burst length (towards client)",
+                 client_burst);
+    cmd.AddValue("burst_to_server",
+                 "max. packet corruption burst length (towards server)",
+                 server_burst);
     cmd.Parse (argc, argv);
     
     NS_ABORT_MSG_IF(delay.length() == 0, "Missing parameter: delay");
@@ -34,7 +41,11 @@ int main(int argc, char *argv[]) {
 
     // Set client and server corruption rates.
     client_corrupts->SetCorruptRate(stoi(client_rate));
-    server_corrupts->SetCorruptRate(stoi(server_rate));
+    if (client_burst.length() > 0)
+        client_corrupts->SetMaxCorruptBurst(stoi(client_burst));
+    server_Corrupts->SetCorruptRate(stoi(server_rate));
+    if (server_burst.length() > 0)
+        server_corrupts->SetMaxDropBurst(stoi(server_burst));
 
     QuicNetworkSimulatorHelper sim;
 
