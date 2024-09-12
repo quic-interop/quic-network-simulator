@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     client_corrupts->SetCorruptRate(stoi(client_rate));
     if (client_burst.length() > 0)
         client_corrupts->SetMaxCorruptBurst(stoi(client_burst));
-    server_Corrupts->SetCorruptRate(stoi(server_rate));
+    server_corrupts->SetCorruptRate(stoi(server_rate));
     if (server_burst.length() > 0)
         server_corrupts->SetMaxCorruptBurst(stoi(server_burst));
 
