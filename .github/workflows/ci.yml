@@ -1,0 +1,19 @@
+name: test-sim-docker-compose-doesnt-crash-on-run
+
+on:
+  pull_request:
+  push:
+    branches:
+    - 'master'
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run sim
+        run: SCENARIO="droplist --delay=15ms --bandwidth=10Mbps --queue=25" docker compose up sim -d --build
+      - name: Wait for container to start
+        run: sleep 5
+      - name: Check if container is still running
+        run: exit $(($(docker ps -q | wc -l) ^ 1 ))
