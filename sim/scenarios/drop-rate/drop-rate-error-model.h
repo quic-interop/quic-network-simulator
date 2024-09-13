@@ -20,7 +20,6 @@ class DropRateErrorModel : public ErrorModel {
     int rate;
     std::mt19937 *rng;
     std::uniform_int_distribution<> distr;
-    int next_rate;
     int burst;
     int dropped_in_a_row;
     int dropped;

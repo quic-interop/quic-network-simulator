@@ -69,17 +69,17 @@ bool QuicPacket::IsVersionNegotiationPacket() {
 
 void QuicPacket::ReassemblePacket() {
     // Start with the UDP payload.
-    Packet new_p = Packet(udp_payload_.data(), udp_payload_.size());
+    Packet * new_p = new Packet(udp_payload_.data(), udp_payload_.size());
     // Add the UDP header and make sure to recalculate the checksum.
     udp_hdr_.ForcePayloadSize(udp_payload_.size() + udp_hdr_len_);
     udp_hdr_.ForceChecksum(0);
     udp_hdr_.InitializeChecksum(ipv4_hdr_.GetSource(), ipv4_hdr_.GetDestination(), ipv4_hdr_.GetProtocol());
-    new_p.AddHeader(udp_hdr_);
+    new_p->AddHeader(udp_hdr_);
     // Add the IP header, again make sure to recalculate the checksum.
     ipv4_hdr_.EnableChecksum();
-    new_p.AddHeader(ipv4_hdr_);
+    new_p->AddHeader(ipv4_hdr_);
     // Add the PPP header.
-    new_p.AddHeader(ppp_hdr_);
+    new_p->AddHeader(ppp_hdr_);
     p_->RemoveAtEnd(p_->GetSize());
-    p_->AddAtEnd(Ptr<Packet>(&new_p));
+    p_->AddAtEnd(Ptr<Packet>(new_p));
 }
