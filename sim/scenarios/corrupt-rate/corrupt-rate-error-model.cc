@@ -103,3 +103,7 @@ bool CorruptRateErrorModel::DoCorrupt(Ptr<Packet> p) {
 void CorruptRateErrorModel::SetCorruptRate(int rate_in) {
     rate = rate_in;
 }
+
+void CorruptRateErrorModel::SetMaxCorruptBurst(int burst_in) {
+    burst = burst_in;
+}
