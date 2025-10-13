@@ -26,7 +26,7 @@ tcpdump -i eth0 -U -w "/logs/trace_node_left.pcap" &
 tcpdump -i eth1 -U -w "/logs/trace_node_right.pcap" &
 eval ./scratch/"$SCENARIO &"
 
-PID=`jobs -p`
+PID=`jobs -p | tr '\n' ' '`
 trap "kill -SIGINT $PID" INT
 trap "kill -SIGTERM $PID" TERM
 trap "kill -SIGKILL $PID" KILL
