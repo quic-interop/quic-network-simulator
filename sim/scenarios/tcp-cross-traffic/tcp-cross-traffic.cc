@@ -4,6 +4,7 @@
 #include "ns3/applications-module.h"
 #include "../helper/quic-network-simulator-helper.h"
 #include "../helper/quic-point-to-point-helper.h"
+#include "../helper/network-config.h"
 
 using namespace ns3;
 
