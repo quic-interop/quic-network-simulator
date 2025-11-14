@@ -14,6 +14,7 @@
 #include "ns3/fd-net-device-module.h"
 #include "ns3/internet-module.h"
 #include "quic-network-simulator-helper.h"
+#include "network-config.h"
 
 using namespace ns3;
 
@@ -74,20 +75,34 @@ QuicNetworkSimulatorHelper::QuicNetworkSimulatorHelper() {
   left_node_ = nodes.Get(0);
   right_node_ = nodes.Get(1);
 
-  installNetDevice(left_node_, "eth0", getMacAddress("eth0"), Ipv4InterfaceAddress("193.167.0.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:0::2", 64));
-  installNetDevice(right_node_, "eth1", getMacAddress("eth1"), Ipv4InterfaceAddress("193.167.100.2", "255.255.255.0"), Ipv6InterfaceAddress("fd00:cafe:cafe:100::2", 64));
+  const NetworkConfig& config = NetworkConfig::Instance();
+  installNetDevice(left_node_, config.GetLeftNetName().c_str(),
+                   getMacAddress(config.GetLeftNetName().c_str()),
+                   Ipv4InterfaceAddress(config.GetClientGatewayV4Addr().c_str(),
+                                        config.GetV4SubnetMask().c_str()),
+                   Ipv6InterfaceAddress(config.GetClientGatewayV6Addr().c_str(),
+                                        config.GetV6PrefixInt()));
+  installNetDevice(right_node_, config.GetRightNetName().c_str(),
+                   getMacAddress(config.GetRightNetName().c_str()),
+                   Ipv4InterfaceAddress(config.GetServerGatewayV4Addr().c_str(),
+                                        config.GetV4SubnetMask().c_str()),
+                   Ipv6InterfaceAddress(config.GetServerGatewayV6Addr().c_str(),
+                                        config.GetV6PrefixInt()));
 }
 
 void massageIpv6Routing(Ptr<Node> local, Ptr<Node> peer) {
   Ptr<Ipv6StaticRouting> routing = Ipv6RoutingHelper::GetRouting<Ipv6StaticRouting>(local->GetObject<Ipv6>()->GetRoutingProtocol());
   Ptr<Ipv6> peer_ipv6 = peer->GetObject<Ipv6>();
   Ipv6Address dst;
+  const NetworkConfig& config = NetworkConfig::Instance();
+  std::string v6_point_to_point_network = config.GetV6PointToPointNetwork();
   for (uint32_t i = 0; i < peer_ipv6->GetNInterfaces(); i++)
     for (uint32_t j = 0; j < peer_ipv6->GetNAddresses(i); j++)
-      if (peer_ipv6->GetAddress(i, j).GetAddress().CombinePrefix(64) == "fd00:cafe:cafe:50::") {
-        dst = peer_ipv6->GetAddress(i, j).GetAddress();
-        goto done;
-      }
+        if (peer_ipv6->GetAddress(i, j).GetAddress().CombinePrefix(
+                config.GetV6PrefixInt()) == v6_point_to_point_network.c_str()) {
+            dst = peer_ipv6->GetAddress(i, j).GetAddress();
+            goto done;
+        }
 
 done:
   assert(dst.IsInitialized());
@@ -106,7 +121,8 @@ void QuicNetworkSimulatorHelper::Run(Time duration) {
   massageIpv6Routing(right_node_, left_node_);
 
   // write the routing table to file
-  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("dynamic-global-routing.routes", std::ios::out);
+  Ptr<OutputStreamWrapper> routingStream =
+      Create<OutputStreamWrapper>("/logs/simulator-routes.txt", std::ios::out);
   Ipv4RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
   Ipv6RoutingHelper::PrintRoutingTableAllAt(Seconds(0.), routingStream);
 

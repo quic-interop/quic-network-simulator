@@ -1,5 +1,6 @@
 #include "rebind-error-model.h"
 #include "ns3/core-module.h"
+#include "../helper/network-config.h"
 #include <cassert>
 
 using namespace std;
@@ -14,7 +15,9 @@ TypeId RebindErrorModel::GetTypeId(void) {
 }
 
 RebindErrorModel::RebindErrorModel()
-    : client("193.167.0.100"), server("193.167.100.100"), nat(client),
+    : client(ns3::NetworkConfig::Instance().GetClientV4Address()),
+      server(ns3::NetworkConfig::Instance().GetServerV4Address()),
+      nat(client),
       rebind_addr(false) {
   rng = CreateObject<UniformRandomVariable>();
 }
