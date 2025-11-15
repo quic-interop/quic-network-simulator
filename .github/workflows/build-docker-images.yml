@@ -11,6 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Get version
+        id: version
+        run: echo "version=$(git describe --tags --always --dirty 2>/dev/null || git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Set up QEMU
         id: qemu
         uses: docker/setup-qemu-action@v3
@@ -37,10 +41,16 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'push' }}
           tags: martenseemann/quic-network-simulator-endpoint:latest
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
   simulator:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
+      - name: Get version
+        id: version
+        run: echo "version=$(git describe --tags --always --dirty 2>/dev/null || git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
         id: qemu
@@ -66,3 +76,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'push' }}
           tags: martenseemann/quic-network-simulator:latest
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}

@@ -2,6 +2,10 @@
 
 set -e
 
+if [ -f /version.txt ]; then
+  echo "QUIC Network Simulator version: $(cat /version.txt)"
+fi
+
 # We are using eth0 and eth1 as EmuFdNetDevices in ns3.
 # Use promiscuous mode to allow ns3 to capture all packets.
 ifconfig eth0 promisc

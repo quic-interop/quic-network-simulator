@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -f /version.txt ]; then
+  echo "QUIC Network Simulator Endpoint version: $(cat /version.txt)"
+fi
+
 # Set up the routing needed for the simulation.
 /setup.sh
 
