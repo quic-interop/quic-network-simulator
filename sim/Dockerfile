@@ -3,6 +3,9 @@ FROM ubuntu:24.04 AS builder
 ARG TARGETARCH
 RUN echo "TARGETARCH : $TARGETARCH"
 
+ARG VERSION=unknown
+RUN echo "VERSION : $VERSION"
+
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y \
   python3 build-essential cmake ninja-build libboost-dev libgsl-dev libxml2-dev \
@@ -37,6 +40,8 @@ RUN cd /wait-for-it-quic && go build .
 
 FROM ubuntu:24.04
 
+ARG VERSION=unknown
+
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   net-tools iptables libgsl-dev libxml2 libsqlite3-0 tcpdump && \
@@ -52,5 +57,7 @@ COPY --from=builder /wait-for-it-quic/wait-for-it-quic /usr/bin
 COPY run.sh .
 RUN chmod +x run.sh
 RUN mkdir /logs
+
+RUN echo "$VERSION" > /version.txt
 
 ENTRYPOINT [ "./run.sh" ]
