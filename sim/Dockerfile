@@ -39,7 +39,7 @@ FROM ubuntu:24.04
 
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
-  net-tools iptables libgsl-dev libxml2 libsqlite3-0 tcpdump && \
+  net-tools iptables libgsl-dev libxml2 libsqlite3-0 wireshark-common && \
   apt-get autoremove -y && apt-get clean -y && \
   rm -rf /var/lib/apt/lists/*
 
