@@ -22,8 +22,8 @@ fi
 
 echo "Using scenario:" $SCENARIO
 
-tcpdump -i eth0 -U -w "/logs/trace_node_left.pcap" &
-tcpdump -i eth1 -U -w "/logs/trace_node_right.pcap" &
+dumpcap -i eth0 -s 0 -w "/logs/trace_node_left.pcap" &
+dumpcap -i eth1 -s 0 -w "/logs/trace_node_right.pcap" &
 eval ./scratch/"$SCENARIO &"
 
 PID=`jobs -p | tr '\n' ' '`
