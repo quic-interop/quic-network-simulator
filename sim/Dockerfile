@@ -8,11 +8,11 @@ RUN apt-get update && \
   python3 build-essential cmake ninja-build libboost-dev libgsl-dev libxml2-dev \
   libsqlite3-dev golang-go
 
-ENV NS_VERS=3.44
-ADD --checksum=sha256:fd2c8ed5814cc298753fb47c73535b6c1127b38d05c9104ced3f6f0b5e693787 \
-  https://www.nsnam.org/release/ns-allinone-$NS_VERS.tar.bz2 ns3.tar.bz2
+ENV NS_VERS=3.46.1
+ADD --checksum=sha256:fd3255df035a52008638fb5d81f77685260fd607be107eaf8e5116bcf1fd2c03 \
+  https://www.nsnam.org/release/ns-$NS_VERS.tar.bz2 ns3.tar.bz2
 RUN tar xjf ns3.tar.bz2 && rm ns3.tar.bz2
-RUN mv /ns-allinone-$NS_VERS/ns-$NS_VERS /ns3
+RUN mv /ns-$NS_VERS /ns3
 
 WORKDIR /ns3
 
