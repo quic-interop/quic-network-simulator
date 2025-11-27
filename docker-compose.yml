@@ -3,6 +3,9 @@ version: "3.5"
 services:
   sim:
     image: martenseemann/quic-network-simulator
+    build:
+      context: sim
+      dockerfile: Dockerfile
     container_name: sim
     hostname: sim
     stdin_open: true
