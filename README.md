@@ -9,10 +9,14 @@ between the client and server to flow through the simulated network.
 
 ## Framework
 
-The framework uses docker-compose to compose three docker images: the network
+The framework uses Docker Compose to compose three docker images: the network
 simulator (as found in the [sim](sim) directory), and a client and a server (as
 found in the individual QUIC implementation directories, or for a simple shell,
 the [endpoint](endpoint) directory).
+
+This repository requires Docker Engine 28.0 or later and Docker Compose 2.36.0
+or later. The simulator uses Compose's `interface_name` option to pin the
+`sim` container's left and right network interfaces to deterministic names.
 
 The framework uses two networks on the host machine: `leftnet` (IPv4
 193.167.0.0/24, IPv6 fd00:cafe:cafe:0::/64) and `rightnet` (IPv4
@@ -134,7 +138,7 @@ setup](https://github.com/h2o/h2o-qns).
    ```
    CLIENT=[client directory name] \
    SERVER=[server directory name] \
-   docker-compose build
+   docker compose build
    ```
 
    Note that you will need to run this build command any time you change the
@@ -145,7 +149,7 @@ setup](https://github.com/h2o/h2o-qns).
    ```
    CLIENT="my_quic_impl" \
    SERVER="another_quic_impl" \
-   docker-compose build
+   docker compose build
    ```
 
 1. You will want to run the setup with a scenario. The scenarios that are
@@ -162,7 +166,7 @@ setup](https://github.com/h2o/h2o-qns).
    SERVER=[server directory name] \
    SERVER_PARAMS=[params to server] \
    SCENARIO=[scenario] \
-   docker-compose up
+   docker compose up
    ```
 
    SERVER_PARAMS and CLIENT_PARAMS may be omitted if the corresponding QUIC
@@ -176,11 +180,11 @@ setup](https://github.com/h2o/h2o-qns).
    CLIENT_PARAMS="-p /10000.txt" \
    SERVER="another_quic_impl" \
    SCENARIO="simple-p2p --delay=15ms --bandwidth=10Mbps --queue=25" \
-   docker-compose up
+   docker compose up
    ```
 
    A mounted directory is provided for recording logs from the endpoints.
-   docker-compose creates a `logs/server` and `logs/client` directory from
+   Docker Compose creates a `logs/server` and `logs/client` directory from
    the directory from which it is run. Inside the docker container, the
    directory is available as `/logs`.
 

@@ -19,9 +19,11 @@ services:
       leftnet:
         ipv4_address: 193.167.0.2
         ipv6_address: fd00:cafe:cafe:0::2
+        interface_name: eth0
       rightnet:
         ipv4_address: 193.167.100.2
         ipv6_address: fd00:cafe:cafe:100::2
+        interface_name: eth1
 
   server:
     build: ./$SERVER
