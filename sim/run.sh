@@ -27,7 +27,21 @@ dumpcap -i eth1 -s 0 -w "/logs/trace_node_right.pcap" &
 eval ./scratch/"$SCENARIO &"
 
 PID=`jobs -p | tr '\n' ' '`
-trap "kill -SIGINT $PID" INT
-trap "kill -SIGTERM $PID" TERM
+
+# On Linux, dumpcap captures through a TPACKET_V3 ring buffer. The kernel hands
+# packets to dumpcap only in blocks, when a block is full or when its timeout
+# (250 ms for dumpcap) expires. Packets in the block that is still open when
+# dumpcap stops are never written to the pcap, so stopping the capture right
+# away loses the last few hundred milliseconds of traffic. Wait for that block
+# to be handed over before stopping the capture.
+# Then wait for dumpcap to finish writing the pcaps: once this script (PID 1)
+# exits, all processes left in the container are killed.
+stop() {
+  sleep 0.5
+  kill -"$1" $PID || true
+  wait
+}
+trap "stop SIGINT" INT
+trap "stop SIGTERM" TERM
 trap "kill -SIGKILL $PID" KILL
 wait
